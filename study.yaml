@@ -1,0 +1,208 @@
+run_01:
+  CBD: 
+    Location: default_name
+    Day: default_value
+    EndTime: default_value
+  WG_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  PV_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbu_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbue_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CEV_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CPl_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  BAT_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  SC_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  HP_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  RC_SPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_baseelectricprofile: default_name
+    nuprofile : default_name
+  CSP_MS_STPwtRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name
+    nuprofile: default_name
+  TPS_MS_STPnoRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    basethermalprofile: default_name
+  PCM_ESS:
+    PNominal: default_value
+  Ctbu_TCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name
+
+run_02:
+  CBD: {Location: Soria, Day: 327.0, EndTime: 86400.0}
+  WG_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  PV_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbu_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbue_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CEV_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CPl_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  BAT_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  SC_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  HP_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  RC_SPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_baseelectricprofile: default_name
+    nuprofile : default_name
+  CSP_MS_STPwtRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name
+    nuprofile: default_name
+  TPS_MS_STPnoRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    basethermalprofile: default_name
+  PCM_ESS:
+    PNominal: default_value
+  Ctbu_TCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name
+run_03:
+  CBD: {Location: Soria, Day: 327.0, EndTime: 86400.0}
+  WG_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  PV_PPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbu_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  Cbue_NSCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CEV_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  CPl_SCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  BAT_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  SC_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  HP_ESSm:
+    PNominal: default_value
+    P_baseElectricProfile: default_name
+    TypeofESS: default_value
+    SoCi: default_value
+    Ness: default_value
+  RC_SPMp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_baseelectricprofile: default_name
+    nuprofile : default_name
+  CSP_MS_STPwtRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name
+    nuprofile: default_name
+  TPS_MS_STPnoRK:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    basethermalprofile: default_name
+  PCM_ESS:
+    PNominal: default_value
+  Ctbu_TCp:
+    PNominal: default_value
+    ProfileCaseVal1_columnSelectionByCase_: default_list
+    ProfileCaseVal2_columnSelectionBySub_case_: default_list
+    P_basethermalprofile: default_name

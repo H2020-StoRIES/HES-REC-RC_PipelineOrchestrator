@@ -2,7 +2,14 @@ import yaml
 import subprocess
 import json
 import os
-
+#What we need:
+#1. Study parameters and the structure of the study file
+#2. making configuration files for each run out of the study file and the initial configuration file
+# = generate_run_configs
+#3. Having optimizaton output files for each run or at least a single output file as an example
+#4. Missing Matlab File related to xls_to_yaml conversion
+#5. Missing python File related to optimization
+path= './..'
 class PipelineDispatcher:
     def __init__(self, study_file, config_file):
         self.study_file = study_file
@@ -52,7 +59,7 @@ class PipelineDispatcher:
     def execute_optimization(self, run_id):
         """Execute optimization for a given run."""
         print(f"Running optimization for run {run_id}...")
-        result = subprocess.run(["matlab", "-batch", f"optimization('{run_id}')"], capture_output=True, text=True)
+        result = subprocess.run(["python", "-batch", f"optimization('{run_id}')"], capture_output=True, text=True)
         print(result.stdout)
         return result.returncode
     
