@@ -10,7 +10,7 @@ def update_conf_run(conf_run, configurable_values):
         if isinstance(value, dict):
             update_conf_run(conf_run[key], value)
         else:
-            if value not in ['default_value', 'default_name', 'default_liat']:
+            if value not in ['default_value', 'default_name', 'default_list']:
                 conf_run[key] = value
                 
 if __name__ == "__main__":

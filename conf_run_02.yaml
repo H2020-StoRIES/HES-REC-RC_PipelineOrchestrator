@@ -221,8 +221,16 @@ CEV_SCp:
     - 0.0
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_:
+  - 2.0
+  - 2.0
+  - 4.0
+  - 5.0
+  ProfileCaseVal2_columnSelectionBySub_case_:
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -368,8 +376,12 @@ CPl_SCp:
     - 0.0
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_:
+  - 2.0
+  - 4.0
+  ProfileCaseVal2_columnSelectionBySub_case_:
+  - 1.0
+  - 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -538,8 +550,8 @@ CSP_MS_STPwtRK:
     - -1758.57
   - - 82800.0
     - -1798.56
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 2.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_PP:
@@ -705,8 +717,8 @@ Cbu_NSCp:
     - 41101.0
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -823,8 +835,8 @@ Cbue_NSCp:
     - 98479.93407593471
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 8.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   epz: N/A
@@ -892,8 +904,8 @@ Ctbu_TCp:
     - 31611.5702479339
   - - 82800.0
     - 15805.7851239669
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 8.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -1148,8 +1160,8 @@ PV_PPMp:
     - 0.0
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -1217,8 +1229,8 @@ RC_SPMp:
   P_baseElectricProfileType: N/A
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -1453,8 +1465,8 @@ TPS_MS_STPnoRK:
     - 100000.0
   - - 82800.0
     - 100000.0
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
@@ -1571,8 +1583,8 @@ WG_PPMp:
     - 13973.0
   P_baseThermalProfile: N/A
   P_baseThermalProfileType: N/A
-  ProfileCaseVal1_columnSelectionByCase_: default_list
-  ProfileCaseVal2_columnSelectionBySub_case_: default_list
+  ProfileCaseVal1_columnSelectionByCase_: 1.0
+  ProfileCaseVal2_columnSelectionBySub_case_: 1.0
   SoCi: N/A
   TypeOfESS: N/A
   ctrlProf_swPP:
