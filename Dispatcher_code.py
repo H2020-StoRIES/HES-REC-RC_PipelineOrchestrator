@@ -1,8 +1,6 @@
 import yaml
 import subprocess
-import json
 import os
-import sys
 
 
 class PipelineDispatcher:
@@ -10,12 +8,12 @@ class PipelineDispatcher:
         self.study_file_Nm = study_file_Nm
         self.config_file_Nm = config_file_Nm
         self.study_file = f'{study_file_Nm}.yaml'
+        self.config_file= f'{config_file_Nm}.yaml'
         self.runs = []
         self.plotON  = 1
         self.cfgON   = 1 
         self.OUTdir = f'{self.config_file_Nm}_output'
         self.UTfile  = ''
-        
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
         self.INdir = f'{self.config_file_Nm}_input'
@@ -69,29 +67,23 @@ class PipelineDispatcher:
         
         #TODO: replace config_example with the actual config file
         #Problem: path to the config file (?)
+
         config= self.read_yaml('config_example')
-        # self.runs = []
-        # i=0
         for run_key, configurable_values in self.study_data.items():
             if run_key.startswith('run_'):
-                # self.runs.append(run_key)
                 conf_run = config.copy()
                 self.update_conf_run(conf_run, configurable_values)
                 with open(f'conf_{run_key}.yaml', 'w') as f:
                     yaml.safe_dump(conf_run, f)
                     print(f"Generated config files for {run_key}.")
-        # print(self.runs)
+
     def execute_optimization(self, run_id):
         pass
-        # """Execute optimization for a given run."""
-        # print(f"Running optimization for run {run_id}...")
-        # result = subprocess.run(["python", "-batch", f"optimization('{run_id}')"], capture_output=True, text=True)
-        # print(result.stdout)
-        # return result.returncode
     
     def execute_simulation(self, run_id):
         OUTyamlNmTxt= f'conf_{run_id}.yaml'
-        print(OUTyamlNmTxt)
+        print(f'simulation is running for file: {OUTyamlNmTxt}')
+        
         matlab_script = f"""
             cd('{self.path_simulation}');
             addpath(genpath('auxFunc'));
@@ -118,38 +110,30 @@ class PipelineDispatcher:
     
     def calculate_kpis(self, run_id):
         pass
-        # """Calculate KPIs for a given run."""
-        # print(f"Calculating KPIs for run {run_id}...")
-        # result = subprocess.run(["python", "kpi_calculation.py", f"Out_sim_run{run_id}.yaml"], capture_output=True, text=True)
-        # print(result.stdout)
-        # return result.returncode
     
     def batch_kpi_calculation(self):
         pass
-        # """Batch calculation of KPIs across all runs."""
-        # print("Calculating batch KPIs...")
-        # result = subprocess.run(["python", "kpi_calculation_batch.py", "study.yaml"], capture_output=True, text=True)
-        # print(result.stdout)
-        # return result.returncode
+
     def run_keys(self):
             for run_key in self.study_data.keys():
                 if run_key.startswith('run_'):
                     self.runs.append(run_key)
 
     def run_pipeline(self):
-        # """Main method to run the entire pipeline."""
-        # # Step 1: Convert XLS to YAML using MATLAB function
-        # self.xls_to_yaml()
+        # Step 1: Convert XLS to YAML using MATLAB function
+        self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
         self.load_study()
         print('Study loaded')
         
         # Step 3: Generate Configuration Files for Each Run
-        # self.generate_run_configs()
+        self.generate_run_configs()
         self.run_keys()
+
         print('Runs generated')
-        print(self.runs)
+        print(f'runs: {self.runs}')
+
         # Step 4: Run Optimization and Simulation for Each Run
         for run in self.runs:
             run_id = run
