@@ -43,16 +43,19 @@ class PipelineDispatcher:
             print(stderr)
             print("Error in xls_to_yaml conversion")
 
-    def read_yaml(self, filename):
-        with open(f'{filename}.yaml','r') as f:
-            output = yaml.safe_load(f)
-        return output
+    def read_yaml(self, filename, path):
+        file_path = os.path.join(path, f'{filename}.yaml')
+        try:
+            print(f"Attempting to open file: {file_path}")
+            with open(file_path, 'r') as f:
+                output = yaml.safe_load(f)
+            return output
+        except FileNotFoundError as e:
+            print(f"File not found: {file_path}")
+            raise e
     
     def load_study(self):
-        """Load study parameters from YAML file."""
-        print(self.study_file)
-        with open(self.study_file, 'r') as file:
-            self.study_data = yaml.safe_load(file)
+        self.study_data = self.read_yaml(self.study_file_Nm, self.path_dispatcher)
 
 
     def update_conf_run(self, conf_run, configurable_values):
@@ -67,8 +70,8 @@ class PipelineDispatcher:
         
         #TODO: replace config_example with the actual config file
         #Problem: path to the config file (?)
-
-        config= self.read_yaml('config_example')
+        
+        config= self.read_yaml(self.config_file_Nm, self.path_simulation)
         for run_key, configurable_values in self.study_data.items():
             if run_key.startswith('run_'):
                 conf_run = config.copy()
@@ -115,12 +118,13 @@ class PipelineDispatcher:
         pass
 
     def run_keys(self):
+        
             for run_key in self.study_data.keys():
                 if run_key.startswith('run_'):
                     self.runs.append(run_key)
 
     def run_pipeline(self):
-        # Step 1: Convert XLS to YAML using MATLAB function
+        # # Step 1: Convert XLS to YAML using MATLAB function
         self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
@@ -135,13 +139,18 @@ class PipelineDispatcher:
         print(f'runs: {self.runs}')
 
         # Step 4: Run Optimization and Simulation for Each Run
-        for run in self.runs:
-            run_id = run
+        for run_id in self.runs:
+
+
+            # Step 4.1: Run Optimization
             # if self.execute_optimization(run_id) != 0:
             #     print(f"Optimization failed for run {run_id}")
-            
+            #     continue
+
+            # Step 4.2: Run Simulation
             if self.execute_simulation(run_id) != 0:
                 print(f"Simulation failed for run {run_id}")
+                continue
             
             # Step 5: Calculate KPIs for Each Run
             self.calculate_kpis(run_id)
@@ -151,7 +160,6 @@ class PipelineDispatcher:
 
 # Example usage
 if __name__ == "__main__":
-    path1= r'C:\Users\szata\Codes\StoriesTeams\t32-ref-case-dev'
-    file_path = os.path.join(os.path.dirname(__file__), path1)
-    dispatcher = PipelineDispatcher(study_file_Nm="study", config_file_Nm="StoRIES_RefCase_Config_rev04")
+    dispatcher = PipelineDispatcher(study_file_Nm="study", 
+                                    config_file_Nm="StoRIES_RefCase_Config_rev04")
     dispatcher.run_pipeline()
