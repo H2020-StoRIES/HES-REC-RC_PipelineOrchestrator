@@ -88,6 +88,7 @@ class PipelineDispatcher:
     def execute_simulation(self, run_id):
         OUTyamlNmTxt= f'conf_{run_id}.yaml'
         print(f'simulation is running for file: {OUTyamlNmTxt}')
+        OUTdir = f'conf_{run_id}_output'
         
         matlab_script = f"""
             clear all; restoredefaultpath %%%%%%%%%%%%%%%
@@ -96,16 +97,15 @@ class PipelineDispatcher:
             addpath(genpath('dataSim')); CIEMAT_EDLC_SC_load
             addpath(genpath('auxFunc'))
             addpath(genpath('{self.path_dispatcher}'))
-
             %%
             caseNm  = '{self.config_file_Nm}';
             UTfile  = '';
             plotON  = 1;
             cfgON   = 1; 
 
-            INfile = [caseNm '.xlsx']; INdir = [caseNm,'_input']; OUTdir = [caseNm,'_output'];
+            INfile = [caseNm '.xlsx']; INdir = [caseNm,'_input']; 
 
-            [out]=t32_RefCase_RunSlx_4yalm2out('{OUTyamlNmTxt}','{self.OUTdir}','{self.MDLfile}',cfgON,plotON,UTfile);
+            [out]=t32_RefCase_RunSlx_4yalm2out('{OUTyamlNmTxt}','{OUTdir}','{self.MDLfile}',cfgON,plotON,UTfile);
 
 
             """
