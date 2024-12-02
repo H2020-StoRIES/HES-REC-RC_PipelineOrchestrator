@@ -23,6 +23,8 @@ class PipelineDispatcher:
     def xls_to_yaml(self):
         
         matlab_script = f"""
+            clear all; restoredefaultpath %%%%%%%%%%%%%%%
+            clearvars -except INstruct; restoredefaultpath
             cd('{self.path_simulation}');
             addpath(genpath('auxFunc'));
             t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}');
@@ -88,10 +90,23 @@ class PipelineDispatcher:
         print(f'simulation is running for file: {OUTyamlNmTxt}')
         
         matlab_script = f"""
+            clear all; restoredefaultpath %%%%%%%%%%%%%%%
+            clearvars -except INstruct; restoredefaultpath
             cd('{self.path_simulation}');
-            addpath(genpath('auxFunc'));
-            addpath(genpath('{self.path_dispatcher}'));
-            t32_RefCase_RunSlx_4yalm2out('{OUTyamlNmTxt}','{self.OUTdir}','{self.MDLfile}','{self.cfgON}','{self.plotON}','{self.UTfile}');
+            addpath(genpath('dataSim')); CIEMAT_EDLC_SC_load
+            addpath(genpath('auxFunc'))
+            addpath(genpath('{self.path_dispatcher}'))
+
+            %%
+            caseNm  = '{self.config_file_Nm}';
+            UTfile  = '';
+            plotON  = 1;
+            cfgON   = 1; 
+
+            INfile = [caseNm '.xlsx']; INdir = [caseNm,'_input']; OUTdir = [caseNm,'_output'];
+
+            [out]=t32_RefCase_RunSlx_4yalm2out('{OUTyamlNmTxt}','{self.OUTdir}','{self.MDLfile}',cfgON,plotON,UTfile);
+
 
             """
         P2 = subprocess.Popen(
@@ -125,14 +140,15 @@ class PipelineDispatcher:
 
     def run_pipeline(self):
         # # Step 1: Convert XLS to YAML using MATLAB function
-        self.xls_to_yaml()
+        # self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
         self.load_study()
         print('Study loaded')
         
-        # Step 3: Generate Configuration Files for Each Run
-        self.generate_run_configs()
+        # # Step 3: Generate Configuration Files for Each Run
+        # self.generate_run_configs()
+        # Step 3.1: Get Run Keys
         self.run_keys()
 
         print('Runs generated')
