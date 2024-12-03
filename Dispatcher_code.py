@@ -1,7 +1,9 @@
 import yaml
 import subprocess
 import os
-
+from time import sleep
+import glob
+import json
 
 class PipelineDispatcher:
     def __init__(self, study_file_Nm, config_file_Nm):
@@ -10,16 +12,13 @@ class PipelineDispatcher:
         self.study_file = f'{study_file_Nm}.yaml'
         self.config_file= f'{config_file_Nm}.yaml'
         self.runs = []
-        self.plotON  = 1
-        self.cfgON   = 1 
-        self.OUTdir = f'{self.config_file_Nm}_output'
-        self.UTfile  = ''
+        # self.OUTdir = f'{self.config_file_Nm}_output'
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
         self.INdir = f'{self.config_file_Nm}_input'
         self.path_simulation= 'C:\\Users\\szata\\Codes\\StoriesTeams\\t32-ref-case-dev'
         self.path_dispatcher= 'C:\\Users\\szata\\Codes\\StoriesTeams\\Pipeline_dispatcher_repo'
-    
+        self.path_kpi_calculation= 'C:\\Users\\szata\\Codes\\StoriesTeams\\KPI_Evaluation\\KPI_Evaluation_python'
     def xls_to_yaml(self):
         
         matlab_script = f"""
@@ -127,7 +126,25 @@ class PipelineDispatcher:
         return P2.returncode
     
     def calculate_kpis(self, run_id):
-        pass
+        # Define the folder path and pattern
+        dir = f'{self.path_simulation}\\conf_{run_id}_output'
+        file_pattern = f'{dir}/OUT_*_KPI.json'
+        print(dir, file_pattern)
+        # Find the file
+        file_list = glob.glob(file_pattern)
+
+        if file_list:
+            # Load the first matching file
+            with open(file_list[0], 'r') as file:
+                file_path = file_list[0]
+                file_name = os.path.basename(file_path)
+                print(f"Found file: {file_name}")
+        else:
+                print(f"No matching file found for pattern: {file_pattern}")
+        print(f'\n \n Calculating KPIs for file: {file_name} and run: {run_id}\n \n')
+        kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
+        subprocess.Popen(['python', kpi_script_path, file_name, dir])
+        sleep(5)
     
     def batch_kpi_calculation(self):
         pass
@@ -140,14 +157,14 @@ class PipelineDispatcher:
 
     def run_pipeline(self):
         # # Step 1: Convert XLS to YAML using MATLAB function
-        # self.xls_to_yaml()
+        self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
         self.load_study()
         print('Study loaded')
         
         # # Step 3: Generate Configuration Files for Each Run
-        # self.generate_run_configs()
+        self.generate_run_configs()
         # Step 3.1: Get Run Keys
         self.run_keys()
 
@@ -158,7 +175,7 @@ class PipelineDispatcher:
         for run_id in self.runs:
 
 
-            # Step 4.1: Run Optimization
+            # # Step 4.1: Run Optimization
             # if self.execute_optimization(run_id) != 0:
             #     print(f"Optimization failed for run {run_id}")
             #     continue
