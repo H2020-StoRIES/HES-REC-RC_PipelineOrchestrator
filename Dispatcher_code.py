@@ -143,8 +143,8 @@ class PipelineDispatcher:
                 print(f"No matching file found for pattern: {file_pattern}")
         print(f'\n \n Calculating KPIs for file: {file_name} and run: {run_id}\n \n')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        subprocess.Popen(['python', kpi_script_path, file_name, dir])
-        sleep(5)
+        subprocess.Popen(['python', kpi_script_path, file_name, dir, run_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        
     
     def batch_kpi_calculation(self):
         pass
@@ -157,7 +157,7 @@ class PipelineDispatcher:
 
     def run_pipeline(self):
         # # Step 1: Convert XLS to YAML using MATLAB function
-        self.xls_to_yaml()
+        # self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
         self.load_study()
@@ -175,15 +175,17 @@ class PipelineDispatcher:
         for run_id in self.runs:
 
 
-            # # Step 4.1: Run Optimization
+            # # # Step 4.1: Run Optimization
             # if self.execute_optimization(run_id) != 0:
             #     print(f"Optimization failed for run {run_id}")
-            #     continue
+            # else:
+            #     print(f"Optimization completed for run {run_id}")
 
-            # Step 4.2: Run Simulation
-            if self.execute_simulation(run_id) != 0:
-                print(f"Simulation failed for run {run_id}")
-                continue
+            # # Step 4.2: Run Simulation
+            # if self.execute_simulation(run_id) != 0:
+            #     print(f"Simulation failed for run {run_id}")
+            # else:
+            #     print(f"Simulation completed for run {run_id}")
             
             # Step 5: Calculate KPIs for Each Run
             self.calculate_kpis(run_id)
