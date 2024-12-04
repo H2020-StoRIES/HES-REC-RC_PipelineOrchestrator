@@ -1,9 +1,9 @@
 import yaml
 import subprocess
 import os
-from time import sleep
 import glob
 import json
+from pathlib import Path
 
 class PipelineDispatcher:
     def __init__(self, study_file_Nm, config_file_Nm):
@@ -13,12 +13,15 @@ class PipelineDispatcher:
         self.config_file= f'{config_file_Nm}.yaml'
         self.runs = []
         # self.OUTdir = f'{self.config_file_Nm}_output'
+        
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
         self.INdir = f'{self.config_file_Nm}_input'
-        self.path_simulation= 'C:\\Users\\szata\\Codes\\StoriesTeams\\t32-ref-case-dev'
-        self.path_dispatcher= 'C:\\Users\\szata\\Codes\\StoriesTeams\\Pipeline_dispatcher_repo'
-        self.path_kpi_calculation= 'C:\\Users\\szata\\Codes\\StoriesTeams\\KPI_Evaluation\\KPI_Evaluation_python'
+
+        script_parent_dir = Path(__file__).parent.parent
+        self.path_simulation= script_parent_dir/'t32-ref-case-dev'
+        self.path_dispatcher= script_parent_dir/'Pipeline-dispatcher'
+        self.path_kpi_calculation= script_parent_dir/'KPI_Evaluation\\KPI_Evaluation_python'
     def xls_to_yaml(self):
         
         matlab_script = f"""
@@ -69,8 +72,6 @@ class PipelineDispatcher:
                 
     def generate_run_configs(self):
         
-        #TODO: replace config_example with the actual config file
-        #Problem: path to the config file (?)
         
         config= self.read_yaml(self.config_file_Nm, self.path_simulation)
         for run_key, configurable_values in self.study_data.items():
@@ -156,8 +157,8 @@ class PipelineDispatcher:
                     self.runs.append(run_key)
 
     def run_pipeline(self):
-        # # Step 1: Convert XLS to YAML using MATLAB function
-        # self.xls_to_yaml()
+        # Step 1: Convert XLS to YAML using MATLAB function
+        self.xls_to_yaml()
         
         # Step 2: Load Study Configuration
         self.load_study()
@@ -175,17 +176,17 @@ class PipelineDispatcher:
         for run_id in self.runs:
 
 
-            # # # Step 4.1: Run Optimization
-            # if self.execute_optimization(run_id) != 0:
-            #     print(f"Optimization failed for run {run_id}")
-            # else:
-            #     print(f"Optimization completed for run {run_id}")
+            # Step 4.1: Run Optimization
+            if self.execute_optimization(run_id) != 0:
+                print(f"Optimization failed for run {run_id}")
+            else:
+                print(f"Optimization completed for run {run_id}")
 
-            # # Step 4.2: Run Simulation
-            # if self.execute_simulation(run_id) != 0:
-            #     print(f"Simulation failed for run {run_id}")
-            # else:
-            #     print(f"Simulation completed for run {run_id}")
+            # Step 4.2: Run Simulation
+            if self.execute_simulation(run_id) != 0:
+                print(f"Simulation failed for run {run_id}")
+            else:
+                print(f"Simulation completed for run {run_id}")
             
             # Step 5: Calculate KPIs for Each Run
             self.calculate_kpis(run_id)
