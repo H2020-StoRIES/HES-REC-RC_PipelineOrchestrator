@@ -13,8 +13,11 @@ study_mode:
 study_param_range:
   # Parameters defined by a list here will be applied to all configurations first entry is the innermost loop.
   # Be aware of the combinatorial explosion when multiple lists are defined here.
-  CBD-Day: [13, 152, 244]
-  Locations: [Soria, Portici]
+  CBD:
+    Day: [13, 152, 244]
+    Location: [Soria, Portici]
+  WG_PPMp:
+    PNominal: [902.0, 1502.0, 222.0]
 study_run_dicts:
   # Here we can define
   run_01:
