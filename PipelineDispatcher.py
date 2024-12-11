@@ -80,17 +80,35 @@ class PipelineDispatcher:
 
         return scenarios
     def generate_scenarios(self):
+        config= self.read_yaml(self.config_file_Nm, self.path_simulation)
         param_ranges = self.study_data['study_param_range']
-        print(f"Generating scenarios for the following parameter ranges: {param_ranges}")
         scenarios = self.generate_combinations(param_ranges)
         study_run_dicts= self.study_data['study_run_dicts']
-        scenario_id = 0
+        print(f'''\n
+Generating scenarios for the following study \n
+parameters: {param_ranges}, \n
+run dictionaries: {study_run_dicts}''')
+
+        self.scenario_id = 0
         for run_name, run_values in study_run_dicts.items():
             for idx, scenario in enumerate(scenarios):
-                scenario_id += 1
-                print(f"Generating scenario {scenario_id} for run {run_name}")
-                with open(f'{self.Output_directory}/scenario_{scenario_id}.yaml', 'w') as f:
-                    config = scenario.copy()
+                self.scenario_id += 1
+                # print(f"Generating scenario {scenario_id} for run {run_name}")
+                # print(f"Scenario: {scenario}, Run: {run_name}, Values: {run_values}")
+                config_copy= config.copy()
+                for outer_key, inner_dict in run_values.items():
+                    for inner_key, value in inner_dict.items():
+                        config_copy[outer_key][inner_key] = value
+                for key, value in scenario.items():
+                    key_split = key.split('.')
+                    config_copy[key_split[0]][key_split[1]] = value
+                with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
+                    yaml.dump(config_copy, f)
+                        
+
+
+                        
+                    # config[]
                     #TODO: Check if this is the correct way to update the config dictionary
                     #TODO: check flattened hierarchical keys
                     
@@ -174,37 +192,31 @@ class PipelineDispatcher:
         # Step 3: Generate Configuration Files for Each Run
         self.generate_scenarios()
         
-
-        # Step 3.1: Get Run Keys
-        self.run_keys()
-
-        print('Runs generated')
-        print(f'runs: {self.runs}')
         
-        # Step 4: Run Optimization and Simulation for Each Run
-        for run_id in self.runs:
+        # # Step 4: Run Optimization and Simulation for Each Run
+        # for run_id in self.runs:
 
 
-            # Step 4.1: Run Optimization
-            if self.execute_optimization(run_id) != 0:
-                print(f"Optimization failed for run {run_id}")
-            else:
-                print(f"Optimization completed for run {run_id}")
+        #     # Step 4.1: Run Optimization
+        #     if self.execute_optimization(run_id) != 0:
+        #         print(f"Optimization failed for run {run_id}")
+        #     else:
+        #         print(f"Optimization completed for run {run_id}")
 
-            # Step 4.2: Run Simulation
-            if self.execute_simulation(run_id, OUTdir_study) != 0:
-                print(f"Simulation failed for run {run_id}")
-            else:
-                print(f"Simulation completed for run {run_id}")
+        #     # Step 4.2: Run Simulation
+        #     if self.execute_simulation(run_id, OUTdir_study) != 0:
+        #         print(f"Simulation failed for run {run_id}")
+        #     else:
+        #         print(f"Simulation completed for run {run_id}")
             
-            # Step 5: Calculate KPIs for Each Run
-            self.calculate_kpis(run_id, OUTdir_study)
+        #     # Step 5: Calculate KPIs for Each Run
+        #     self.calculate_kpis(run_id, OUTdir_study)
         
-        # Step 6: Calculate Batch KPIs
-        self.batch_kpi_calculation()
+        # # Step 6: Calculate Batch KPIs
+        # self.batch_kpi_calculation()
 
 # Example usage
 if __name__ == "__main__":
     dispatcher = PipelineDispatcher(study_file_Nm="study_simple", 
-                                    config_file_Nm="StoRIES_RefCase_Config_Simple")
+                                    config_file_Nm="StoRIES_RefCase_Config_rev04")
     dispatcher.run_pipeline()
