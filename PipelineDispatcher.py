@@ -32,6 +32,7 @@ class PipelineDispatcher:
             addpath(genpath('auxFunc'));
             t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}');
             """
+        
         P1 = subprocess.Popen(
             ['matlab', '-batch', matlab_script], 
             stdout=subprocess.PIPE, 
@@ -104,41 +105,27 @@ run dictionaries: {study_run_dicts}''')
                     config_copy[key_split[0]][key_split[1]] = value
                 with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
                     yaml.dump(config_copy, f)
-                        
-
-
-                        
-                    # config[]
-                    #TODO: Check if this is the correct way to update the config dictionary
-                    #TODO: check flattened hierarchical keys
+                print(f"Scenario {self.scenario_id} generated for run {run_name}")
                     
 
     def execute_optimization(self, run_id):
         pass
     
-    def execute_simulation(self, run_id, OUTdir_study):
-        OUTyamlNmTxt= f'conf_{run_id}'
-        print(f'simulation is running for file: {OUTyamlNmTxt}')
-        
-        
-
+    def execute_simulation(self, OUTyamlNmTxt, OUTfile):
+        print(f"Executing simulation")
         matlab_script = f"""
             clear all; restoredefaultpath %%%%%%%%%%%%%%%
             clearvars -except INstruct; restoredefaultpath
             cd('{self.path_simulation}');
             addpath(genpath('dataSim')); CIEMAT_EDLC_SC_load
             addpath(genpath('auxFunc'))
-            addpath(genpath('{self.path_dispatcher}'))
+            addpath(genpath('{self.Output_directory}'))
             %%
-            caseNm  = '{self.config_file_Nm}';
             UTfile  = '';
             plotON  = 1;
             cfgON   = 1; 
-            OUTdir  = ['..\\log_data\\{OUTdir_study}\\{OUTyamlNmTxt}'];
-            INfile = [caseNm '.xlsx']; 
-            INdir = [caseNm,'_input']; 
-            OUTnm= 'Output';
-            [out]=t32_RefCase_RunSlx_4yalm2out('{OUTyamlNmTxt}.yaml',OUTdir,OUTnm,'{self.MDLfile}',cfgON,plotON,UTfile);
+            MDLfile  = 'ElectricSys_CEDERsimple01';
+            [out] = t32_RefCase_RunSlx_4yalm2out({OUTyamlNmTxt},{OUTfile},MDLfile,cfgON,plotON,'',1);
             """
         P2 = subprocess.Popen(
             ['matlab', '-batch', matlab_script], 
@@ -160,10 +147,10 @@ run dictionaries: {study_run_dicts}''')
     def calculate_kpis(self, run_id, OUTdir_study):
         print(f'KPI calculation is running for file: {run_id}')
         script_parent_dir = Path(__file__).parent.parent
-        path = script_parent_dir / 'log_data'/ OUTdir_study/f'conf_{run_id}'
+        path = script_parent_dir / 'log_data'/ OUTdir_study
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        subprocess.Popen(['python', kpi_script_path, 'Output_KPI',path, run_id])
+        subprocess.Popen(['python', kpi_script_path, f'scenario_{run_id}_KPI',path, run_id])
            
     def batch_kpi_calculation(self):
         pass
@@ -176,6 +163,7 @@ run dictionaries: {study_run_dicts}''')
 
 # ********************************************************************************************************************
     def run_pipeline(self):
+        
         OUTdir_study = f'Study_{time():.00f}'
 
         script_parent_dir = Path(__file__).parent.parent
@@ -183,40 +171,37 @@ run dictionaries: {study_run_dicts}''')
         os.mkdir(log_data / OUTdir_study)
         self.Output_directory = log_data / OUTdir_study
         # Step 1: Load Study Configuration
+        # TODO: define xls_to_yaml function based on the study configuration
         self.load_study()
         print('Study loaded')
        
         # Step 2: Convert XLS to YAML using MATLAB function
-        # self.xls_to_yaml()
+        self.xls_to_yaml()
         
-        # Step 3: Generate Configuration Files for Each Run
+        # Step 3: run optimization
+        # step 4: run simulation
         self.generate_scenarios()
         
+        OUTyamlNmTxt= []
+        OUTfile= []
+        #TODO: update paths based on current location
+        #TODO; remove parent directory from path
+
+        #TODO: organize paths for outputs
+        for idx in range(self.scenario_id):
+            OUTyamlNmTxt.append(f'{self.Output_directory}\\scenario_{idx+1}.yaml')
+            OUTfile.append(f'..\log_data\{OUTdir_study}\scenario_{idx+1}')
         
-        # # Step 4: Run Optimization and Simulation for Each Run
-        # for run_id in self.runs:
-
-
-        #     # Step 4.1: Run Optimization
-        #     if self.execute_optimization(run_id) != 0:
-        #         print(f"Optimization failed for run {run_id}")
-        #     else:
-        #         print(f"Optimization completed for run {run_id}")
-
-        #     # Step 4.2: Run Simulation
-        #     if self.execute_simulation(run_id, OUTdir_study) != 0:
-        #         print(f"Simulation failed for run {run_id}")
-        #     else:
-        #         print(f"Simulation completed for run {run_id}")
-            
-        #     # Step 5: Calculate KPIs for Each Run
-        #     self.calculate_kpis(run_id, OUTdir_study)
+        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile))
+        # Step 5: Calculate KPIs for Each Run
+        for idx in range(self.scenario_id):
+            self.calculate_kpis(str(idx+1), OUTdir_study)
         
         # # Step 6: Calculate Batch KPIs
         # self.batch_kpi_calculation()
 
 # Example usage
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_simple", 
+    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1", 
                                     config_file_Nm="StoRIES_RefCase_Config_rev04")
     dispatcher.run_pipeline()
