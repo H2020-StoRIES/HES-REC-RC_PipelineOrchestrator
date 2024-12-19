@@ -4,25 +4,24 @@ import os
 from pathlib import Path
 from time import time
 from itertools import product
-
-
+import json
+import pandas as pd
 class PipelineDispatcher:
-    def __init__(self, study_file_Nm, config_file_Nm):
+    def __init__(self, study_file_Nm):
         self.study_file_Nm = study_file_Nm
-        self.config_file_Nm = config_file_Nm
+        # self.config_file_Nm = config_file_Nm
         self.study_file = f'{study_file_Nm}.yaml'
-        self.config_file= f'{config_file_Nm}.yaml'
+        # self.config_file= f'{config_file_Nm}.yaml'
         self.runs = []
         # self.OUTdir = f'{self.config_file_Nm}_output'
-        
-        self.MDLfile = 'ElectricSys_CEDERsimple01'
-        self.INfile = f'{self.config_file_Nm}.xlsx'
-        self.INdir = f'{self.config_file_Nm}_input'
-
-        script_parent_dir = Path(__file__).parent.parent
-        self.path_simulation= script_parent_dir/'t32-ref-case-dev'
-        self.path_dispatcher= script_parent_dir/'Pipeline-dispatcher'
-        self.path_kpi_calculation= script_parent_dir/'KPI_Evaluation\\KPI_Evaluation_python'
+    
+        # script_parent_dir = Path(__file__).parent.parent
+        # self.path_simulation= script_parent_dir/'t32-ref-case-dev'
+        # self.path_dispatcher= script_parent_dir/'Pipeline-dispatcher'
+        # self.path_kpi_calculation= script_parent_dir/'KPI_Evaluation\\KPI_Evaluation_python'
+        self.path_simulation= '../t32-ref-case-dev'
+        self.path_dispatcher= '../Pipeline-dispatcher'
+        self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
     def xls_to_yaml(self):
         
         matlab_script = f"""
@@ -80,8 +79,99 @@ class PipelineDispatcher:
         scenarios = [dict(zip(param_keys, combo)) for combo in combinations]
 
         return scenarios
+    def read_csv_content(self, excel_file):
+        try:
+            csv_address = f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{excel_file}.csv'
+            df = pd.read_csv(csv_address)
+            print(df[1:])
+            pause= input('''Press Enter to continue... /n
+                         
+                         Data problem
+                         
+                         some has 24 rows and some has 10 rows and some 35000''')
+            return df.to_dict(orient='records')
+        except FileNotFoundError:
+            print(f"File not found: {csv_address}")
+            return None
+    def replace_strings_with_csv_columns(self, yaml_content, outer_key):
+        for key, value in yaml_content.items():
+            if key == 'epzProfile_val':
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
+                print(f"Excel file: {CSV_file}")
+            if key == 'nuProfile_val':
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_nuPrizes_2022'
+                print(f"Excel file: {CSV_file}")
+            if isinstance(value, str) and key.endswith('ElectricProfile_val'):
+                if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
+                    number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
+                    number1="{:03d}".format(int(number1))
+                    number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
+                    number2="{:03d}".format(int(number2))
+                    print(number1, number2)
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
+                    print(f"CSV file: {CSV_file}")
+                    # Assuming you have a function to read the Excel file and get the content
+                    excel_content = self.read_csv_content(CSV_file)
+                    self.config_copy[outer_key][key] = excel_content
+                    # print(f'value of *****{self.config_copy[outer_key][key]}')
+                    # print(f"Excel content: {excel_content}")
+                    # pause= input("Press Enter to continue...")
+                else:
+                    for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
+                        number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
+                        number1="{:03d}".format(int(number1))
+                        number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
+                        number2="{:03d}".format(int(number2))
+                        print(number1, number2)
+                        CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
+                        print(f"CSV file: {CSV_file}")
+                        excel_content = self.read_csv_content(CSV_file)
+                        self.config_copy[outer_key][key] = excel_content
+                        # print(f'value of *****{self.config_copy[outer_key][key]}')
+                        # print(f"Excel content: {excel_content}")
+                        # pause= input("Press Enter to continue...")
+            elif isinstance(value, str) and key.startswith('ThermalProfile_val'):
+                if isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
+                    number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
+                    number1="{:03d}".format(int(number1))
+                    number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
+                    number2="{:03d}".format(int(number2))
+                    print(number1, number2)
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
+                    print(f"CSV file: {CSV_file}")
+                    excel_content = self.read_csv_content(CSV_file)
+                    self.config_copy[outer_key][key] = excel_content
+                    # print(f'value of *****{self.config_copy[outer_key][key]}')
+                    # print(f"Excel content: {excel_content}")
+                    # pause= input("Press Enter to continue...")
+                else:
+                    for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
+                        number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
+                        number1="{:03d}".format(int(number1))
+                        number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
+                        number2="{:03d}".format(int(number2))
+                        print(number1, number2)
+                        CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
+                        print(f"CSV file: {CSV_file}")
+                        excel_content = self.read_csv_content(CSV_file)
+                        self.config_copy[outer_key][key] = excel_content
+                        # pause= input("Press Enter to continue...")
+            elif isinstance(value, str) and key.startswith('ctrl'):
+                # outer_key= key
+                print(f"outer key: {outer_key}")
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
+                print(key.split('_')[1])
+                column= f'{outer_key}_{key.split('_')[1]}'
+                print(f"CSV file: {CSV_file}, Column: {column}")
+                # pause= input("Press Enter to continue...")
+            elif isinstance(value, dict):
+                outer_key= key
+                print(f"outer key: {outer_key}")
+                self.replace_strings_with_csv_columns(value, outer_key)
+        
     def generate_scenarios(self):
         config= self.read_yaml(self.config_file_Nm, self.path_simulation)
+        self.config_copy = config
         param_ranges = self.study_data['study_param_range']
         scenarios = self.generate_combinations(param_ranges)
         study_run_dicts= self.study_data['study_run_dicts']
@@ -96,17 +186,48 @@ run dictionaries: {study_run_dicts}''')
                 self.scenario_id += 1
                 # print(f"Generating scenario {scenario_id} for run {run_name}")
                 # print(f"Scenario: {scenario}, Run: {run_name}, Values: {run_values}")
-                config_copy= config.copy()
+                self.config_copy= config.copy()
                 for outer_key, inner_dict in run_values.items():
                     for inner_key, value in inner_dict.items():
-                        config_copy[outer_key][inner_key] = value
+                        self.config_copy[outer_key][inner_key] = value
                 for key, value in scenario.items():
                     key_split = key.split('.')
-                    config_copy[key_split[0]][key_split[1]] = value
+                    self.config_copy[key_split[0]][key_split[1]] = value
+                # with open(f'{self.Output_directory}/scenario_{run_name}_{idx}.yaml', 'w') as f:
+                # self.replace_strings_with_csv_columns(self.config_copy ,outer_key = '')
                 with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
-                    yaml.dump(config_copy, f)
-                print(f"Scenario {self.scenario_id} generated for run {run_name}")
-                    
+                    yaml.dump(self.config_copy, f)
+                print(f"Scenario {self.scenario_id} and {idx} generated for run {run_name}")
+                print(scenarios)
+                # Write scenario to JSON file
+                scenario_json = {
+                    "scenario_id": self.scenario_id,
+                    "run_name": run_name,
+                    "run_id": idx+1,
+                    "scenario": scenario
+                }
+                json_file_path = f'{self.Output_directory}/Execution_definition.json'
+                if os.path.exists(json_file_path):
+                    with open(json_file_path, 'r') as json_file:
+                        data = json.load(json_file)
+                        if not isinstance(data, list):
+                            data = [data]
+                        data.append(scenario_json)
+                    with open(json_file_path, 'w') as json_file:
+                        json.dump(data, json_file, indent=4)
+                else:
+                    with open(json_file_path, 'w') as json_file:
+                        json.dump([scenario_json], json_file, indent=4)
+                print(f"Scenario {self.scenario_id} written to JSON file: {json_file_path}")
+        with open(json_file_path, 'r') as json_file:
+            data = json.load(json_file)
+            print(f"Data: {data}")
+            if not isinstance(data, list):
+                data = [data]
+            data.append(self.study_data)
+        with open(json_file_path, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+            
 
     def execute_optimization(self, run_id):
         pass
@@ -146,8 +267,9 @@ run dictionaries: {study_run_dicts}''')
     
     def calculate_kpis(self, run_id, OUTdir_study):
         print(f'KPI calculation is running for file: {run_id}')
-        script_parent_dir = Path(__file__).parent.parent
-        path = script_parent_dir / 'log_data'/ OUTdir_study
+        # script_parent_dir = Path(__file__).parent.parent
+        # path = script_parent_dir / 'log_data'/ OUTdir_study
+        path = f'../log_data/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
         subprocess.Popen(['python', kpi_script_path, f'scenario_{run_id}_KPI',path, run_id])
@@ -166,17 +288,31 @@ run dictionaries: {study_run_dicts}''')
         
         OUTdir_study = f'Study_{time():.00f}'
 
-        script_parent_dir = Path(__file__).parent.parent
-        log_data = script_parent_dir / 'log_data'
-        os.mkdir(log_data / OUTdir_study)
-        self.Output_directory = log_data / OUTdir_study
+        # script_parent_dir = Path(__file__).parent.parent
+        # log_data = script_parent_dir / 'log_data'
+        log_data = '../log_data'
+        os.mkdir(f'../log_data/{OUTdir_study}')
+        self.Output_directory = f'../log_data/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         # TODO: define xls_to_yaml function based on the study configuration
         self.load_study()
         print('Study loaded')
-       
-        # Step 2: Convert XLS to YAML using MATLAB function
-        self.xls_to_yaml()
+        self.config_file_Nm = self.study_data['base_config']['base_config_xls']
+        self.config_file= f'{self.config_file_Nm}.yaml'
+        self.MDLfile = 'ElectricSys_CEDERsimple01'
+        self.INfile = f'{self.config_file_Nm}.xlsx'
+        self.INdir = f'{self.config_file_Nm}_input'
+        if self.study_data['base_config']['base_config_yaml'] is None:
+            self.xls_to_yaml() 
+            self.study_data['base_config']['base_config_yaml'] = self.config_file_Nm
+            with open(f'{self.config_file}.yaml', 'w') as f:
+                yaml.dump(self.config_file, f)
+        elif self.study_data['base_config']['base_config_yaml'] == self.config_file_Nm:
+            pass
+        else:
+            print(f"Error: base_config_yaml does not match base_config_xls")
+            exit(1)
+        
         
         # Step 3: run optimization
         # step 4: run simulation
@@ -184,10 +320,6 @@ run dictionaries: {study_run_dicts}''')
         
         OUTyamlNmTxt= []
         OUTfile= []
-        #TODO: update paths based on current location
-        #TODO; remove parent directory from path
-
-        #TODO: organize paths for outputs
         for idx in range(self.scenario_id):
             OUTyamlNmTxt.append(f'{self.Output_directory}\\scenario_{idx+1}.yaml')
             OUTfile.append(f'..\log_data\{OUTdir_study}\scenario_{idx+1}')
@@ -202,6 +334,5 @@ run dictionaries: {study_run_dicts}''')
 
 # Example usage
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1", 
-                                    config_file_Nm="StoRIES_RefCase_Config_rev04")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
     dispatcher.run_pipeline()
