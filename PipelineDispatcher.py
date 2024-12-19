@@ -1,3 +1,5 @@
+#TODO: Check short profile replacement
+#TODO: check initial example values with acceptable ranges
 import yaml
 import subprocess
 import os
@@ -6,6 +8,7 @@ from time import time
 from itertools import product
 import json
 import pandas as pd
+import numpy as np
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
         self.study_file_Nm = study_file_Nm
@@ -79,29 +82,35 @@ class PipelineDispatcher:
         scenarios = [dict(zip(param_keys, combo)) for combo in combinations]
 
         return scenarios
-    def read_csv_content(self, excel_file):
-        try:
-            csv_address = f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{excel_file}.csv'
-            df = pd.read_csv(csv_address)
-            print(df[1:])
-            pause= input('''Press Enter to continue... /n
-                         
-                         Data problem
-                         
-                         some has 24 rows and some has 10 rows and some 35000''')
-            return df.to_dict(orient='records')
-        except FileNotFoundError:
-            print(f"File not found: {csv_address}")
-            return None
+    
+    def Read_data_from_csv (self, file_path, data_type, Day= 1):
+        # print(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}')
+        with open(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}.csv', mode='r', newline='') as file:
+            csv_reader = pd.read_csv(file)
+            r = []
+            if data_type =='Diary':
+                day=1
+            elif data_type== 'Anual':
+                day= Day
+
+            for i in range(24):
+                id= i+(day-1)*24
+                row = csv_reader[csv_reader.isin([id*(3600)]).any(axis=1)]
+                if not row.empty:
+                    r.append([id*3600, float(row.iloc[0, 1])])
+        return r
     def replace_strings_with_csv_columns(self, yaml_content, outer_key):
         for key, value in yaml_content.items():
             if key == 'epzProfile_val':
+                data_type= 'Anual'
                 CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
                 print(f"Excel file: {CSV_file}")
             if key == 'nuProfile_val':
+                data_type= 'Anual'
                 CSV_file= f'TP_{self.config_copy['CBD']['Location']}_nuPrizes_2022'
                 print(f"Excel file: {CSV_file}")
-            if isinstance(value, str) and key.endswith('ElectricProfile_val'):
+            if key.endswith('ElectricProfile_val'):
+                #if there is just one component
                 if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
                     number1="{:03d}".format(int(number1))
@@ -110,13 +119,41 @@ class PipelineDispatcher:
                     print(number1, number2)
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
                     print(f"CSV file: {CSV_file}")
-                    # Assuming you have a function to read the Excel file and get the content
-                    excel_content = self.read_csv_content(CSV_file)
-                    self.config_copy[outer_key][key] = excel_content
-                    # print(f'value of *****{self.config_copy[outer_key][key]}')
-                    # print(f"Excel content: {excel_content}")
-                    # pause= input("Press Enter to continue...")
+                    if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
+                        data_type= 'Anual'
+                        Day= self.config_copy ['CBD']['Day']
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                        self.config_copy[outer_key][key] = Data
+                    elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
+                        data_type= 'Diary'
+                        Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                        self.config_copy[outer_key][key] = Data
+                    elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
+                        # data_type= 'Short profile'
+                        # CSV_file1= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
+                        # column= f'{outer_key}_tON'
+                        # path1=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file1}.csv'
+                        # path2=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
+                        # with open(path1, mode='r', newline='') as file:
+                        #     csv_reader = pd.read_csv(file)
+                        #     T_ON = csv_reader[column].tolist()
+                        # with open(path2, mode='r', newline='') as file:
+                        #     csv_reader = pd.read_csv(file)
+                        #     data_list = []
+                        #     for i in range (24):
+                        #         #TODO: check this for T_ON! A small change was is needed here
+                        #         if not np.isnan(T_ON[ii]):
+                        #             data_list.append([i*3600, csv_reader.iloc[i, 1]])
+                        #         else:
+                        #             data_list.append([i*3600, 0])
+
+                        #     self.config_copy[outer_key][key] = data_list
+                        pass
+                    else:
+                        print('Error')
                 else:
+                    #if there are multiple components
+                    data_list = []
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
                         number1="{:03d}".format(int(number1))
@@ -125,12 +162,54 @@ class PipelineDispatcher:
                         print(number1, number2)
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
                         print(f"CSV file: {CSV_file}")
-                        excel_content = self.read_csv_content(CSV_file)
-                        self.config_copy[outer_key][key] = excel_content
-                        # print(f'value of *****{self.config_copy[outer_key][key]}')
-                        # print(f"Excel content: {excel_content}")
-                        # pause= input("Press Enter to continue...")
-            elif isinstance(value, str) and key.startswith('ThermalProfile_val'):
+                        if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
+                            data_type= 'Anual'
+                            Day= self.config_copy ['CBD']['Day']
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                            if Data1== []:
+                                Data1= Data
+                            else:
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                            self.config_copy[outer_key][key] = Data1
+                        elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
+                            data_type= 'Diary'
+                            Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                            if Data1== []:
+                                Data1= Data
+                            else:
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                            self.config_copy[outer_key][key] = Data1
+                        elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
+                            # data_type= 'Short profile'
+                            # CSV_file1= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
+                            # column= f'{outer_key}_tON'
+                            # path1=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file1}.csv'
+                            # path2=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
+                            # with open(path1, mode='r', newline='') as file:
+                            #     csv_reader = pd.read_csv(file)
+                            #     T_ON = csv_reader[column].tolist()
+                            #     print(T_ON)
+                            # with open(path2, mode='r', newline='') as file:
+                            #     csv_reader = pd.read_csv(file)
+                            # if data_list== []:
+                            #     for ii in range (24):
+                            #         if not np.isnan(T_ON[ii]):
+                            #             print(ii)
+                            #             data_list.append([ii*3600, csv_reader.iloc[ii, 1]])
+                            #         else:
+                            #             data_list.append([ii*3600, 0])
+                            # else:
+                            #     for ii in range (24):
+                            #         if not np.isnan(T_ON[ii]):
+                            #             print(ii)
+                            #             data_list[ii].append(csv_reader.iloc[ii, 1])
+                            #         else:
+                            #             data_list[ii].append(0)
+                            # self.config_copy[outer_key][key] = data_list
+                            pass
+                        else:
+                            print('Error')
+            elif key.startswith('ThermalProfile_val'):
                 if isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
                     number1="{:03d}".format(int(number1))
@@ -139,11 +218,17 @@ class PipelineDispatcher:
                     print(number1, number2)
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
                     print(f"CSV file: {CSV_file}")
-                    excel_content = self.read_csv_content(CSV_file)
-                    self.config_copy[outer_key][key] = excel_content
-                    # print(f'value of *****{self.config_copy[outer_key][key]}')
-                    # print(f"Excel content: {excel_content}")
-                    # pause= input("Press Enter to continue...")
+                    if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
+                        data_type= 'Anual'
+                        Day= self.config_copy ['CBD']['Day']
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                        self.config_copy[outer_key][key] = Data
+                    elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
+                        data_type= 'Diary'
+                        Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                        self.config_copy[outer_key][key] = Data
+                    else:
+                        print('Error')
                 else:
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
@@ -153,17 +238,39 @@ class PipelineDispatcher:
                         print(number1, number2)
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
                         print(f"CSV file: {CSV_file}")
-                        excel_content = self.read_csv_content(CSV_file)
-                        self.config_copy[outer_key][key] = excel_content
                         # pause= input("Press Enter to continue...")
-            elif isinstance(value, str) and key.startswith('ctrl'):
+                        Data1= []
+                        if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
+                            data_type= 'Anual'
+                            Day= self.config_copy ['CBD']['Day']
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                            self.config_copy[outer_key][key] = Data
+                            if Data1== []:
+                                Data1= Data
+                            else:
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                            self.config_copy[outer_key][key] = Data1
+                        elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
+                            data_type= 'Diary'
+                            Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                            self.config_copy[outer_key][key] = Data
+                            if Data1== []:
+                                Data1= Data
+                            else:
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                            self.config_copy[outer_key][key] = Data1
+                        else:
+                            print('Error')
+            elif key.startswith('ctrl'):
                 # outer_key= key
-                print(f"outer key: {outer_key}")
+                data_type= 'Diary'
                 CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
-                print(key.split('_')[1])
                 column= f'{outer_key}_{key.split('_')[1]}'
-                print(f"CSV file: {CSV_file}, Column: {column}")
-                # pause= input("Press Enter to continue...")
+                path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
+                with open(path, mode='r', newline='') as file:
+                    csv_reader = pd.read_csv(file)
+                    data_list = [[time, data] for time, data in zip(csv_reader['Time'], csv_reader[column])]
+                    self.config_copy[outer_key][key] = data_list
             elif isinstance(value, dict):
                 outer_key= key
                 print(f"outer key: {outer_key}")
@@ -194,7 +301,7 @@ run dictionaries: {study_run_dicts}''')
                     key_split = key.split('.')
                     self.config_copy[key_split[0]][key_split[1]] = value
                 # with open(f'{self.Output_directory}/scenario_{run_name}_{idx}.yaml', 'w') as f:
-                # self.replace_strings_with_csv_columns(self.config_copy ,outer_key = '')
+                self.replace_strings_with_csv_columns(self.config_copy ,outer_key = '')
                 with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
                     yaml.dump(self.config_copy, f)
                 print(f"Scenario {self.scenario_id} and {idx} generated for run {run_name}")
