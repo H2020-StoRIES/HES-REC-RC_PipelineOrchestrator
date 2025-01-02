@@ -16,9 +16,9 @@ study_param_range:
     WG_PPMp:
       PNominal: [902.0, 1502.0, 222.0]
 study_run_dicts:
-  # run_01:
-  #   BAT_ESSm:
-  #     PNominal: 902.0
+  run_01:
+    BAT_ESSm:
+      PNominal: 902.0
   # run_02:
   #   BAT_ESSm:
   #     PNominal: 1502.0

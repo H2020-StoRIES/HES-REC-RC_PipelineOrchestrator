@@ -15,7 +15,7 @@ class PipelineDispatcher:
         # self.config_file= f'{config_file_Nm}.yaml'
         self.runs = []
         # self.OUTdir = f'{self.config_file_Nm}_output'
-    
+        self.scenario_name = []
         # script_parent_dir = Path(__file__).parent.parent
         # self.path_simulation= script_parent_dir/'t32-ref-case-dev'
         # self.path_dispatcher= script_parent_dir/'Pipeline-dispatcher'
@@ -130,26 +130,7 @@ class PipelineDispatcher:
                         Data= self.Read_data_from_csv (CSV_file, data_type, 1)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
-                        # data_type= 'Short profile'
-                        # CSV_file1= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
-                        # column= f'{outer_key}_tON'
-                        # path1=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file1}.csv'
-                        # path2=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
-                        # with open(path1, mode='r', newline='') as file:
-                        #     csv_reader = pd.read_csv(file)
-                        #     T_ON = csv_reader[column].tolist()
-                        # with open(path2, mode='r', newline='') as file:
-                        #     csv_reader = pd.read_csv(file)
-                        #     data_list = []
-                        #     for i in range (24):
-                        #         #TODO: check this for T_ON! A small change was is needed here
-                        #         if not np.isnan(T_ON[ii]):
-                        #             data_list.append([i*3600, csv_reader.iloc[i, 1]])
-                        #         else:
-                        #             data_list.append([i*3600, 0])
-
-                        #     self.config_copy[outer_key][key] = data_list
-                        pass
+                        print('Error: Short profile not allowed for ElectricProfile')
                     else:
                         print('Error')
                 else:
@@ -181,32 +162,7 @@ class PipelineDispatcher:
                                 Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
-                            # data_type= 'Short profile'
-                            # CSV_file1= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
-                            # column= f'{outer_key}_tON'
-                            # path1=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file1}.csv'
-                            # path2=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
-                            # with open(path1, mode='r', newline='') as file:
-                            #     csv_reader = pd.read_csv(file)
-                            #     T_ON = csv_reader[column].tolist()
-                            #     print(T_ON)
-                            # with open(path2, mode='r', newline='') as file:
-                            #     csv_reader = pd.read_csv(file)
-                            # if data_list== []:
-                            #     for ii in range (24):
-                            #         if not np.isnan(T_ON[ii]):
-                            #             print(ii)
-                            #             data_list.append([ii*3600, csv_reader.iloc[ii, 1]])
-                            #         else:
-                            #             data_list.append([ii*3600, 0])
-                            # else:
-                            #     for ii in range (24):
-                            #         if not np.isnan(T_ON[ii]):
-                            #             print(ii)
-                            #             data_list[ii].append(csv_reader.iloc[ii, 1])
-                            #         else:
-                            #             data_list[ii].append(0)
-                            # self.config_copy[outer_key][key] = data_list
+                            print('Error: Short profile not allowed for ElectricProfile')
                             pass
                         else:
                             print('Error')
@@ -261,7 +217,7 @@ class PipelineDispatcher:
                                 Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         else:
-                            print('Error')
+                            print('Error: Short profile not allowed for ElectricProfile')
             elif key.startswith('ctrl'):
                 if key.endswith('tON'):
                     # outer_key= key
@@ -312,11 +268,13 @@ run dictionaries: {study_run_dicts}''')
                 for key, value in scenario.items():
                     key_split = key.split('.')
                     self.config_copy[key_split[0]][key_split[1]] = value
-                # with open(f'{self.Output_directory}/scenario_{run_name}_{idx}.yaml', 'w') as f:
+                
                 self.replace_strings_with_csv_columns(self.config_copy ,outer_key = '')
-                with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
+                # with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
+                with open(f'{self.Output_directory}/scenario_{run_name}_{idx+1}.yaml', 'w') as f:
+                    self.scenario_name.append(f'scenario_{run_name}_{idx+1}')
                     yaml.dump(self.config_copy, f)
-                print(f"Scenario {self.scenario_id} and {idx} generated for run {run_name}")
+                print(f"Scenario {self.scenario_id} and {idx+1} generated for run {run_name}")
                 print(scenarios)
                 # Write scenario to JSON file
                 scenario_json = {
@@ -439,14 +397,14 @@ run dictionaries: {study_run_dicts}''')
         
         OUTyamlNmTxt= []
         OUTfile= []
-        for idx in range(self.scenario_id):
-            OUTyamlNmTxt.append(f'{self.Output_directory}\\scenario_{idx+1}.yaml')
-            OUTfile.append(f'..\log_data\{OUTdir_study}\scenario_{idx+1}')
+        for idx in self.scenario_name:
+            OUTyamlNmTxt.append(f'{self.Output_directory}\\{idx}.yaml')
+            OUTfile.append(f'..\log_data\{OUTdir_study}\scenario_{idx}')
         
         self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile))
         # Step 5: Calculate KPIs for Each Run
-        for idx in range(self.scenario_id):
-            self.calculate_kpis(str(idx+1), OUTdir_study)
+        for idx in self.scenario_name:
+            self.calculate_kpis(idx, OUTdir_study)
         
         # # Step 6: Calculate Batch KPIs
         # self.batch_kpi_calculation()
