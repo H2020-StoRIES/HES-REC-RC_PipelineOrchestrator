@@ -1,5 +1,3 @@
-#TODO: Check short profile replacement
-#TODO: check initial example values with acceptable ranges
 import yaml
 import subprocess
 import os
@@ -98,6 +96,9 @@ class PipelineDispatcher:
                 row = csv_reader[csv_reader.isin([id*(3600)]).any(axis=1)]
                 if not row.empty:
                     r.append([id*3600, float(row.iloc[0, 1])])
+                else:
+                    r.append([id*3600, 0])
+        
         return r
     def replace_strings_with_csv_columns(self, yaml_content, outer_key):
         for key, value in yaml_content.items():
@@ -262,15 +263,26 @@ class PipelineDispatcher:
                         else:
                             print('Error')
             elif key.startswith('ctrl'):
-                # outer_key= key
-                data_type= 'Diary'
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
-                column= f'{outer_key}_{key.split('_')[1]}'
-                path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
-                with open(path, mode='r', newline='') as file:
-                    csv_reader = pd.read_csv(file)
-                    data_list = [[time, data] for time, data in zip(csv_reader['Time'], csv_reader[column])]
-                    self.config_copy[outer_key][key] = data_list
+                if key.endswith('tON'):
+                    # outer_key= key
+                    data_type= 'Short profile'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
+                    column= f'{outer_key}_tON'
+                    path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
+                    with open(path, mode='r', newline='') as file:
+                        csv_reader = pd.read_csv(file)
+                        data_list = csv_reader[column].dropna().tolist() # eliminate NaN values
+                        self.config_copy[outer_key][key] = data_list
+                else:
+                    # outer_key= key
+                    data_type= 'Diary'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
+                    column= f'{outer_key}_{key.split('_')[1]}'
+                    path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
+                    with open(path, mode='r', newline='') as file:
+                        csv_reader = pd.read_csv(file)
+                        data_list = [[time, data] for time, data in zip(csv_reader['Time'], csv_reader[column])]
+                        self.config_copy[outer_key][key] = data_list
             elif isinstance(value, dict):
                 outer_key= key
                 print(f"outer key: {outer_key}")
