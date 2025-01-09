@@ -85,6 +85,8 @@ class PipelineDispatcher:
         return scenarios
     
     def Read_data_from_csv (self, file_path, data_type, Day, interval):
+        H= 3600
+        T= 24
         # print(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}')
         with open(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}.csv', mode='r', newline='') as file:
             csv_reader = pd.read_csv(file, header=None)
@@ -96,20 +98,20 @@ class PipelineDispatcher:
 
             if data_type== 'Short profile':
                 interval =interval
-                for i in range(24):
-                        id= i+(day-1)*24
-                        period= 3600/interval
+                for i in range(T):
+                        id= i+(day-1)*T
+                        period= H/interval
                         # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
-                        df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * 3600) & (csv_reader.iloc[:,0]  < (id + 1) * 3600)].fillna(0)
+                        df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
                         # pause= input("Press Enter to continue...")
-                        r.append([i * 3600, float(df.iloc[:, 1].sum() / period)])
+                        r.append([i * H, float(df.iloc[:, 1].sum() / period)])
 
             else:
-                for i in range(24):
-                    id= i+(day-1)*24
-                    period= 3600/interval
-                    row = csv_reader.loc[(csv_reader.iloc[:,0] >= id * 3600) & (csv_reader.iloc[:,0]  < (id + 1) * 3600)].fillna(0)
-                    r.append([i * 3600, float(row.iloc[:, 1].sum() / period)])
+                for i in range(T):
+                    id= i+(day-1)*T
+                    period= H/interval
+                    row = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
+                    r.append([i * H, float(row.iloc[:, 1].sum() / period)])
 
 
         

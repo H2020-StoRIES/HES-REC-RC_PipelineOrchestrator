@@ -8,16 +8,15 @@ study_mode:
 study_param_range:
   CBD:
     Day:
-    - 327
-    # - 13
-    # - 152
-    # - 244
+    - 13
+    - 152
+    - 244
     Location:
     - Soria
 study_run_dicts:
   run_01:
     BAT_ESSm:
       PNominal: 902.0
-  # run_02:
-  #   BAT_ESSm:
-  #     PNominal: 1502.0
+  run_02:
+    BAT_ESSm:
+      PNominal: 1502.0
