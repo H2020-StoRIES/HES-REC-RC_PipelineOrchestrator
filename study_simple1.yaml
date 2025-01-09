@@ -8,13 +8,12 @@ study_mode:
 study_param_range:
   CBD:
     Day:
-    - 13
-    - 152
-    - 244
+    - 327
+    # - 13
+    # - 152
+    # - 244
     Location:
     - Soria
-    WG_PPMp:
-      PNominal: [902.0, 1502.0, 222.0]
 study_run_dicts:
   run_01:
     BAT_ESSm:

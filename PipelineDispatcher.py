@@ -7,6 +7,9 @@ from itertools import product
 import json
 import pandas as pd
 import numpy as np
+#Different from config:
+# Cbue*100. Ask Marcos!
+# WG and Cbu last data . but this code is correct
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
         self.study_file_Nm = study_file_Nm
@@ -81,23 +84,34 @@ class PipelineDispatcher:
 
         return scenarios
     
-    def Read_data_from_csv (self, file_path, data_type, Day= 1):
+    def Read_data_from_csv (self, file_path, data_type, Day, interval):
         # print(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}')
         with open(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}.csv', mode='r', newline='') as file:
-            csv_reader = pd.read_csv(file)
+            csv_reader = pd.read_csv(file, header=None)
             r = []
-            if data_type =='Diary':
+            if data_type =='Diary' or data_type== 'Short profile':
                 day=1
             elif data_type== 'Anual':
                 day= Day
 
-            for i in range(24):
-                id= i+(day-1)*24
-                row = csv_reader[csv_reader.isin([id*(3600)]).any(axis=1)]
-                if not row.empty:
-                    r.append([id*3600, float(row.iloc[0, 1])])
-                else:
-                    r.append([id*3600, 0])
+            if data_type== 'Short profile':
+                interval =interval
+                for i in range(24):
+                        id= i+(day-1)*24
+                        period= 3600/interval
+                        # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
+                        df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * 3600) & (csv_reader.iloc[:,0]  < (id + 1) * 3600)].fillna(0)
+                        # pause= input("Press Enter to continue...")
+                        r.append([i * 3600, float(df.iloc[:, 1].sum() / period)])
+
+            else:
+                for i in range(24):
+                    id= i+(day-1)*24
+                    period= 3600/interval
+                    row = csv_reader.loc[(csv_reader.iloc[:,0] >= id * 3600) & (csv_reader.iloc[:,0]  < (id + 1) * 3600)].fillna(0)
+                    r.append([i * 3600, float(row.iloc[:, 1].sum() / period)])
+
+
         
         return r
     def replace_strings_with_csv_columns(self, yaml_content, outer_key):
@@ -105,11 +119,9 @@ class PipelineDispatcher:
             if key == 'epzProfile_val':
                 data_type= 'Anual'
                 CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
-                print(f"Excel file: {CSV_file}")
             if key == 'nuProfile_val':
                 data_type= 'Anual'
                 CSV_file= f'TP_{self.config_copy['CBD']['Location']}_nuPrizes_2022'
-                print(f"Excel file: {CSV_file}")
             if key.endswith('ElectricProfile_val'):
                 #if there is just one component
                 if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
@@ -117,17 +129,19 @@ class PipelineDispatcher:
                     number1="{:03d}".format(int(number1))
                     number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                     number2="{:03d}".format(int(number2))
-                    print(number1, number2)
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
-                    print(f"CSV file: {CSV_file}")
                     if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                        if outer_key== 'CSP_MS_STPwtRK':
+                            interval = 3600
+                        else:
+                            interval = 900
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
                         data_type= 'Diary'
-                        Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
                         print('Error: Short profile not allowed for ElectricProfile')
@@ -135,35 +149,42 @@ class PipelineDispatcher:
                         print('Error')
                 else:
                     #if there are multiple components
-                    data_list = []
+                    Data1 = []
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
                         number1="{:03d}".format(int(number1))
                         number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
                         number2="{:03d}".format(int(number2))
-                        print(number1, number2)
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseElectricProfile']}_{number1}_{number2}'
-                        print(f"CSV file: {CSV_file}")
                         if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900)
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                                Data1= [Data1[i][:] + [Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
                             data_type= 'Diary'
-                            Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 3600)
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
+                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
-                            print('Error: Short profile not allowed for ElectricProfile')
-                            pass
+                            data_type= 'Short profile'
+                            if outer_key== 'CEV_SCp':
+                                interval = 900
+                            else:
+                                interval = 60
+                            Data= self.Read_data_from_csv (CSV_file, data_type,  Day=1, interval= interval)
+                            if Data1== []:
+                                Data1= Data
+                            else:
+                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
+                            self.config_copy[outer_key][key] = Data1
                         else:
                             print('Error')
             elif key.startswith('ThermalProfile_val'):
@@ -172,17 +193,15 @@ class PipelineDispatcher:
                     number1="{:03d}".format(int(number1))
                     number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                     number2="{:03d}".format(int(number2))
-                    print(number1, number2)
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
-                    print(f"CSV file: {CSV_file}")
                     if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                         data_type= 'Diary'
-                        Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                         self.config_copy[outer_key][key] = Data
                     else:
                         print('Error')
@@ -192,15 +211,13 @@ class PipelineDispatcher:
                         number1="{:03d}".format(int(number1))
                         number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
                         number2="{:03d}".format(int(number2))
-                        print(number1, number2)
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
-                        print(f"CSV file: {CSV_file}")
                         # pause= input("Press Enter to continue...")
                         Data1= []
                         if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval=900)
                             self.config_copy[outer_key][key] = Data
                             if Data1== []:
                                 Data1= Data
@@ -209,7 +226,7 @@ class PipelineDispatcher:
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                             data_type= 'Diary'
-                            Data= self.Read_data_from_csv (CSV_file, data_type, 1)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                             self.config_copy[outer_key][key] = Data
                             if Data1== []:
                                 Data1= Data
@@ -217,7 +234,7 @@ class PipelineDispatcher:
                                 Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         else:
-                            print('Error: Short profile not allowed for ElectricProfile')
+                            print('Error: Short profile not allowed for Thermal Profile')
             elif key.startswith('ctrl'):
                 if key.endswith('tON'):
                     # outer_key= key
@@ -241,7 +258,6 @@ class PipelineDispatcher:
                         self.config_copy[outer_key][key] = data_list
             elif isinstance(value, dict):
                 outer_key= key
-                print(f"outer key: {outer_key}")
                 self.replace_strings_with_csv_columns(value, outer_key)
         
     def generate_scenarios(self):
@@ -349,29 +365,43 @@ run dictionaries: {study_run_dicts}''')
         path = f'../log_data/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        subprocess.Popen(['python', kpi_script_path, f'scenario_{run_id}_KPI',path, run_id])
+        subprocess.Popen(['python', kpi_script_path, f'{run_id}_KPI',path, run_id])
            
-    def batch_kpi_calculation(self):
-        pass
-
+    
     def run_keys(self):
         
             for run_key in self.study_data.keys():
                 if run_key.startswith('run_'):
                     self.runs.append(run_key)
+    def batch_kpi_calculation(self):
+        KPI_summary= []
+        for idx in self.scenario_name:
+            path= f'{self.Output_directory}/KPI_outputs_{idx}.json'
+            try:
+                with open(path, 'r') as f:
+                    data = json.load(f)
+                    data['scenario_name'] = idx
+                    KPI_summary.append(data)
+            except FileNotFoundError as e:
+                print(f"File not found: {path}")
+                raise e
+        with open(f'{self.Output_directory}/KPI_summary.json', 'w') as f:
+            json.dump(KPI_summary, f, indent=4)
+        if KPI_summary:
+            df = pd.DataFrame(KPI_summary)
+            df.to_csv(f'{self.Output_directory}/KPI_summary.csv', index=False)
+            print(f"KPI summary written to JSON file: {self.Output_directory}/KPI_summary.json")
+        else:
+            print("No KPI summary data to write.")
 
 # ********************************************************************************************************************
     def run_pipeline(self):
         
         OUTdir_study = f'Study_{time():.00f}'
-
-        # script_parent_dir = Path(__file__).parent.parent
-        # log_data = script_parent_dir / 'log_data'
         log_data = '../log_data'
         os.mkdir(f'../log_data/{OUTdir_study}')
         self.Output_directory = f'../log_data/{OUTdir_study}' 
         # Step 1: Load Study Configuration
-        # TODO: define xls_to_yaml function based on the study configuration
         self.load_study()
         print('Study loaded')
         self.config_file_Nm = self.study_data['base_config']['base_config_xls']
@@ -382,14 +412,14 @@ run dictionaries: {study_run_dicts}''')
         if self.study_data['base_config']['base_config_yaml'] is None:
             self.xls_to_yaml() 
             self.study_data['base_config']['base_config_yaml'] = self.config_file_Nm
-            with open(f'{self.config_file}.yaml', 'w') as f:
-                yaml.dump(self.config_file, f)
+            # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
+            with open(f'{self.study_file_Nm}.yaml', 'w') as f:
+                yaml.dump(self.study_data, f)
         elif self.study_data['base_config']['base_config_yaml'] == self.config_file_Nm:
             pass
         else:
             print(f"Error: base_config_yaml does not match base_config_xls")
             exit(1)
-        
         
         # Step 3: run optimization
         # step 4: run simulation
@@ -399,15 +429,17 @@ run dictionaries: {study_run_dicts}''')
         OUTfile= []
         for idx in self.scenario_name:
             OUTyamlNmTxt.append(f'{self.Output_directory}\\{idx}.yaml')
-            OUTfile.append(f'..\log_data\{OUTdir_study}\scenario_{idx}')
+            OUTfile.append(f'..\log_data\{OUTdir_study}\{idx}')
         
         self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile))
         # Step 5: Calculate KPIs for Each Run
         for idx in self.scenario_name:
             self.calculate_kpis(idx, OUTdir_study)
-        
-        # # Step 6: Calculate Batch KPIs
-        # self.batch_kpi_calculation()
+            
+        wait= input("Press Enter to continue...")
+
+        # Step 6: Calculate Batch KPIs
+        self.batch_kpi_calculation()
 
 # Example usage
 if __name__ == "__main__":
