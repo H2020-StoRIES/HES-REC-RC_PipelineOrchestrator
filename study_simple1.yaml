@@ -1,6 +1,6 @@
 base_config:
-  base_config_xls: StoRIES_RefCase_Config_rev04
-  base_config_yaml: StoRIES_RefCase_Config_rev04
+  base_config_xls: Base_case1
+  base_config_yaml: Base_case1
   force_reload: false
 study_mode:
   param_range: false
@@ -8,15 +8,9 @@ study_mode:
 study_param_range:
   CBD:
     Day:
-    - 13
-    - 152
-    - 244
+    - 51
+    - 143
+    - 209
+    - 350
     Location:
     - Soria
-study_run_dicts:
-  run_01:
-    BAT_ESSm:
-      PNominal: 902.0
-  run_02:
-    BAT_ESSm:
-      PNominal: 1502.0
