@@ -33,7 +33,7 @@ class PipelineDispatcher:
             clearvars -except INstruct; restoredefaultpath
             cd('{self.path_simulation}');
             addpath(genpath('auxFunc'));
-            t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}.yaml',1);
+            t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}');
             """
         
         P1 = subprocess.Popen(
@@ -47,7 +47,7 @@ class PipelineDispatcher:
 
         if P1.returncode == 0:
             print(stdout)
-            print(f"Config file converted to YAML by MATLAB.")
+            print("Config file converted to YAML by MATLAB.")
         else:
             print(stderr)
             print("Error in xls_to_yaml conversion")
@@ -84,10 +84,11 @@ class PipelineDispatcher:
 
         return scenarios
     
-    def Read_data_from_csv (self, file_path, data_type, Day, interval, factor):
+    def Read_data_from_csv (self, file_path, data_type, Day, interval):
         H= 3600
         T= 24
-        with open(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{file_path}.csv', mode='r', newline='') as file:
+        # print(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}')
+        with open(f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{file_path}.csv', mode='r', newline='') as file:
             csv_reader = pd.read_csv(file, header=None)
             r = []
             if data_type =='Diary' or data_type== 'Short profile':
@@ -103,15 +104,14 @@ class PipelineDispatcher:
                         # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
                         df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
                         # pause= input("Press Enter to continue...")
-                        r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
+                        r.append([i * H, float(df.iloc[:, 1].sum() / period)])
 
             else:
-                interval =interval  
                 for i in range(T):
                     id= i+(day-1)*T
                     period= H/interval
                     row = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                    r.append([i * H, factor*float(row.iloc[:, 1].sum() / period)])
+                    r.append([i * H, float(row.iloc[:, 1].sum() / period)])
 
 
         
@@ -120,47 +120,11 @@ class PipelineDispatcher:
         for key, value in yaml_content.items():
             if key == 'epzProfile_val':
                 data_type= 'Anual'
-                Day= self.config_copy ['CBD']['Day']
-                factor= 1
-                interval = 3600
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022_SZT'
-                day=Day
-                T=24
-                H=3600
-                r= []
-                csv_reader = pd.read_csv(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv', header=None)
-                for i in range(T):
-                        id= i+(day-1)*T
-                        period= H/interval
-                        # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
-                        df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                        # pause= input("Press Enter to continue...")
-                        r.append([i * H, factor* float(df.iloc[:, 1].sum() / period), factor* float(df.iloc[:, 2].sum() / period)])
-                self.config_copy[outer_key][key] = r
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
             if key == 'nuProfile_val':
                 data_type= 'Anual'
-                interval = 3600
-                number1= self.config_copy[outer_key]['ProfileCaseVal1_columnSelectionByCase_']
-                number1="{:03d}".format(int(number1))
-                number2= self.config_copy[outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
-                number2="{:03d}".format(int(number2))
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_RC_nu_{number1}_{number2}'
-                Day= self.config_copy ['CBD']['Day']
-                T=24
-                H=3600
-                r= []
-                csv_reader = pd.read_csv(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv', header=None)
-                for i in range(T):
-                        id= i+(Day-1)*T
-                        period= H/interval
-                        factor= 1
-                        # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
-                        df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                        # pause= input("Press Enter to continue...")
-                        r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
-                self.config_copy[outer_key][key] = r
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_nuPrizes_2022'
             if key.endswith('ElectricProfile_val'):
-                factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
                 #if there is just one component
                 if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
@@ -175,13 +139,11 @@ class PipelineDispatcher:
                             interval = 3600
                         else:
                             interval = 900
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
-                        
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
                         data_type= 'Diary'
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
-                        
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
                         print('Error: Short profile not allowed for ElectricProfile')
@@ -199,27 +161,19 @@ class PipelineDispatcher:
                         if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            if outer_key== 'CSP_MS_STPwtRK':
-                                interval = 3600
-                            else:
-                                interval = 900
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= interval, factor= factor)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900)
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
-                            
+                                Data1= [Data1[i][:] + [Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
                             data_type= 'Diary'
-                            Day= 1
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 3600, factor= factor)
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 3600)
                             if Data1== []:
                                 Data1= Data
                             else:
-                                # Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
                                 Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
-                            
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Short profile':
                             data_type= 'Short profile'
@@ -227,17 +181,15 @@ class PipelineDispatcher:
                                 interval = 900
                             else:
                                 interval = 60
-                            Data= self.Read_data_from_csv (CSV_file, data_type,  Day=1, interval= interval, factor= factor)
+                            Data= self.Read_data_from_csv (CSV_file, data_type,  Day=1, interval= interval)
                             if Data1== []:
                                 Data1= Data
                             else:
                                 Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
-                            
                             self.config_copy[outer_key][key] = Data1
                         else:
                             print('Error')
             elif key.startswith('ThermalProfile_val'):
-                factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
                 if isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
                     number1="{:03d}".format(int(number1))
@@ -247,13 +199,11 @@ class PipelineDispatcher:
                     if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900, factor= factor)
-                        
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900)
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                         data_type= 'Diary'
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
-                        
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                         self.config_copy[outer_key][key] = Data
                     else:
                         print('Error')
@@ -269,29 +219,21 @@ class PipelineDispatcher:
                         if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            if outer_key== 'CSP_MS_STPwtRK':
-                                interval = 3600
-                            else:
-                                interval = 900
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval=interval, factor= factor)
-                            
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval=900)
                             self.config_copy[outer_key][key] = Data
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
-                            
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                             data_type= 'Diary'
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
-                            
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600)
                             self.config_copy[outer_key][key] = Data
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [Data1[i][:] + [Data[i][1]] for i in range(len(Data))]
-                            
+                                Data1= [[Data1[i][:],Data[i][1]] for i in range(len(Data))]
                             self.config_copy[outer_key][key] = Data1
                         else:
                             print('Error: Short profile not allowed for Thermal Profile')
@@ -299,10 +241,9 @@ class PipelineDispatcher:
                 if key.endswith('tON'):
                     # outer_key= key
                     data_type= 'Short profile'
-                    day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
                     column= f'{outer_key}_tON'
-                    path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
+                    path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
                         csv_reader = pd.read_csv(file)
                         data_list = csv_reader[column].dropna().tolist() # eliminate NaN values
@@ -310,10 +251,9 @@ class PipelineDispatcher:
                 else:
                     # outer_key= key
                     data_type= 'Diary'
-                    day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_327'
                     column= f'{outer_key}_{key.split('_')[1]}'
-                    path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
+                    path=f'{self.path_simulation}/StoRIES_RefCase_Config_rev04_input/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
                         csv_reader = pd.read_csv(file)
                         data_list = [[time, data] for time, data in zip(csv_reader['Time'], csv_reader[column])]
@@ -324,7 +264,8 @@ class PipelineDispatcher:
         
     def generate_scenarios(self):
         config= self.read_yaml(self.config_file_Nm, self.path_simulation)
-        
+        with open(f'{self.Output_directory}/Base_case.yaml', 'w') as f:
+                    yaml.dump(config, f)
         self.config_copy = config
         param_ranges = self.study_data['study_param_range']
         scenarios = self.generate_combinations(param_ranges)
@@ -332,9 +273,9 @@ class PipelineDispatcher:
         if 'study_run_dicts' in self.study_data:
             study_run_dicts= self.study_data['study_run_dicts']
             print(f'''\n
-            Generating scenarios for the following study \n
-            parameters: {param_ranges}, \n
-            run dictionaries: {study_run_dicts}''')
+    Generating scenarios for the following study \n
+    parameters: {param_ranges}, \n
+    run dictionaries: {study_run_dicts}''')
             for run_name, run_values in study_run_dicts.items():
                 for idx, scenario in enumerate(scenarios):
                     self.scenario_id += 1
@@ -353,8 +294,6 @@ class PipelineDispatcher:
                     with open(f'{self.Output_directory}/scenario_{run_name}_{idx+1}.yaml', 'w') as f:
                         self.scenario_name.append(f'scenario_{run_name}_{idx+1}')
                         yaml.dump(self.config_copy, f)
-                        if run_name == 'run_01':
-                            self.base_case_NM= f'scenario_{run_name}_{idx+1}'
                     print(f"Scenario {self.scenario_id} and {idx+1} generated for run {run_name}")
                     print(scenarios)
                     # Write scenario to JSON file
@@ -378,7 +317,6 @@ class PipelineDispatcher:
                             json.dump([scenario_json], json_file, indent=4)
                     print(f"Scenario {self.scenario_id} written to JSON file: {json_file_path}")
         else: #When there are no run dictionaries
-            self.base_case_NM= f'scenario_1'
             for idx, scenario in enumerate(scenarios):
                 self.scenario_id += 1
                 self.config_copy= config.copy()
@@ -436,7 +374,6 @@ class PipelineDispatcher:
             cfgON   = 1; 
             MDLfile  = 'ElectricSys_CEDERsimple01';
             [out] = t32_RefCase_RunSlx_4yalm2out({OUTyamlNmTxt},{OUTfile},MDLfile,cfgON,plotON,'',1);
-
             """
         P2 = subprocess.Popen(
             ['matlab', '-batch', matlab_script], 
@@ -447,10 +384,12 @@ class PipelineDispatcher:
 
         stdout, stderr = P2.communicate()
 
-        if P2.returncode != 0:
-            print(f"MATLAB error: {stderr}")
+        if P2.returncode == 0:
+            print(stdout)
+            print("Simulation completed.")
         else:
-            print(f"MATLAB output: {stdout}")
+            print(stderr)
+            print("Error in simulation")
         return P2.returncode
     
     def calculate_kpis(self, run_id, OUTdir_study):
@@ -493,9 +432,8 @@ class PipelineDispatcher:
     def run_pipeline(self):
         
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1737131704' #4KPI
         log_data = '../log_data'
-        os.mkdir(f'../log_data/{OUTdir_study}') #4KPI
+        os.mkdir(f'../log_data/{OUTdir_study}')
         self.Output_directory = f'../log_data/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         self.load_study()
@@ -504,12 +442,12 @@ class PipelineDispatcher:
         self.config_file= f'{self.config_file_Nm}.yaml'
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
-        self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
+        self.INdir = f'{self.config_file_Nm}_input'
         if self.study_data['base_config']['base_config_yaml'] is None:
             self.xls_to_yaml() 
-            # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
             self.study_data['base_config']['base_config_yaml'] = self.config_file_Nm
-            with open(f'{self.study_file}', 'w') as f:
+            # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
+            with open(f'{self.study_file_Nm}.yaml', 'w') as f:
                 yaml.dump(self.study_data, f)
         elif self.study_data['base_config']['base_config_yaml'] == self.config_file_Nm:
             pass
@@ -519,16 +457,14 @@ class PipelineDispatcher:
         self.generate_scenarios()
         OUTyamlNmTxt= []
         OUTfile= []
+        OUTyamlNmTxt.append(f'{self.Output_directory}/Base_case.yaml')
+        OUTfile.append(f'..\log_data\{OUTdir_study}\Base_case')
         for idx in self.scenario_name:
-            OUTyamlNmTxt.append(f'{self.Output_directory}/{idx}.yaml')
-            OUTfile.append(f'{self.Output_directory}/{idx}')
-        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
-        with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
-            base_case_data = json.load(f)
-        with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
-            json.dump(base_case_data, f, indent=4)
-        pause= input("Press Enter to continue...")
-        # Step 4: Calculate KPIs for Base Case
+            OUTyamlNmTxt.append(f'{self.Output_directory}\\{idx}.yaml')
+            OUTfile.append(f'..\log_data\{OUTdir_study}\{idx}')
+        
+        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile))
+        
         path = f'../log_data/{OUTdir_study}'
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
         subprocess.Popen(['python', kpi_script_path, f'Base_case_KPI',path])
