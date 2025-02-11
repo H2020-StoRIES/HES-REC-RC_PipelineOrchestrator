@@ -7,162 +7,49 @@ study_mode:
   run_dict: true
 study_param_range:
   CBD:
-    Day:
-    - 51
-    
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
 study_run_dicts:
-  # Here we can define
   run_01:
-    BAT_ESSm: 
+    CBD:
+      Day: 51_1
+    BAT_ESSm:
       Ness: 83
       PNominal: 83*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
     PCM_ESS:
       Ness: 28
       PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
     SC_ESSm:
       PNominal: 0
     TPS_MS_STPnoRK:
       PNominal: 0
-  run_02:
-    BAT_ESSm: 
-      Ness: 66
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 28
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK: # Is it in the simulation?
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK: # Is it in the simulation?
-      PNominal: 0
-  run_03:
-    BAT_ESSm: 
-      Ness: 100
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 28
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_04:
-    BAT_ESSm: 
-      Ness: 83
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 22
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_05:
-    BAT_ESSm: 
-      Ness: 83
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 34
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_06:
-
-    BAT_ESSm: 
-      Ness: 92
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 31
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_07:
-    BAT_ESSm: 
-      Ness: 74.
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 31
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_08:
-    BAT_ESSm: 
-      Ness: 74
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 25
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
-  run_09:
-    BAT_ESSm: 
-      Ness: 92
-      PNominal: 28*82
-    PCM_ESS:
-      Ness: 25
-      PNominal: 28*50
-    CPl_SCp:
-      PNominal: 0
-    CEV_SCp:
-      PNominal: 0
-    CSP_MS_STPwtRK:
-      PNominal: 0
-    SC_ESSm:
-      PNominal: 0
-    TPS_MS_STPnoRK:
-      PNominal: 0
+ 

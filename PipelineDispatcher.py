@@ -300,7 +300,7 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Short profile'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number} (2)'
                     column= f'{outer_key}_tON'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -311,7 +311,7 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Diary'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number} (2)'
                     column= f'{outer_key}_{key.split('_')[1]}'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -493,7 +493,7 @@ class PipelineDispatcher:
     def run_pipeline(self):
         
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1737131704' #4KPI
+        # OUTdir_study = 'Study_1737132576' #4KPI
         log_data = '../log_data'
         os.mkdir(f'../log_data/{OUTdir_study}') #4KPI
         self.Output_directory = f'../log_data/{OUTdir_study}' 
@@ -523,11 +523,25 @@ class PipelineDispatcher:
             OUTyamlNmTxt.append(f'{self.Output_directory}/{idx}.yaml')
             OUTfile.append(f'{self.Output_directory}/{idx}')
         self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
+        # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
         with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
             base_case_data = json.load(f)
         with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
             json.dump(base_case_data, f, indent=4)
-        pause= input("Press Enter to continue...")
+        # Add some columns to the _KPI.json files
+        for idx in self.scenario_name:
+            with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
+                data = json.load(f)
+            with open(f'{self.Output_directory}/{idx}.yaml', 'r') as f:
+                scenario_data= yaml.safe_load(f)
+                data['Total_El_load'] = [sum(row[1:]) + sum(row2[1:]) + sum(row3[1:]) for row, row2, row3 in zip(scenario_data['Cbue_NSCp']['P_baseElectricProfile_val'], scenario_data['Cbu_NSCp']['P_baseElectricProfile_val'], scenario_data['CEV_SCp']['P_baseElectricProfile_val'])]
+                data['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
+                data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
+                data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
+                data['Price']= scenario_data['CBD']['Price']
+
+            with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
+                json.dump(data, f, indent=4)
         # Step 4: Calculate KPIs for Base Case
         path = f'../log_data/{OUTdir_study}'
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
