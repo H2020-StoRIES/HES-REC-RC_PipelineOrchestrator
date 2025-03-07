@@ -1,0 +1,410 @@
+base_config:
+  base_config_xls: Base_case1
+  base_config_yaml: Base_case1
+  force_reload: false
+study_mode:
+  param_range: false
+  run_dict: true
+study_param_range:
+  CBD:
+    Day: 
+    - 51
+study_run_dicts:
+  run_01:
+    BAT_ESSm:
+      Ness: 83
+      PNominal: 83*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 28
+      PNominal: 28*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 1
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_02:
+    BAT_ESSm:
+      Ness: 88
+      PNominal: 88*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 20
+      PNominal: 20*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 2
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_03:
+    CBD:
+    BAT_ESSm:
+      Ness: 78
+      PNominal: 78*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 36
+      PNominal: 36*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 3
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_04:
+    BAT_ESSm:
+      Ness: 90
+      PNominal: 90*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 36
+      PNominal: 36*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 4
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_05:
+    BAT_ESSm:
+      Ness: 95
+      PNominal: 95*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 28
+      PNominal: 28*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 5
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_06:
+    BAT_ESSm:
+      Ness: 85
+      PNominal: 85*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 44
+      PNominal: 44*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 6
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_07:
+    BAT_ESSm:
+      Ness: 75
+      PNominal: 75*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 22
+      PNominal: 22*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 7
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_08:
+    BAT_ESSm:
+      Ness: 80
+      PNominal: 80*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 13
+      PNominal: 13*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 8
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  run_09:
+    BAT_ESSm:
+      Ness: 70
+      PNominal: 70*82
+    CEV_SCp:
+      PNominal: 0
+    CPl_SCp:
+      PNominal: 0
+    CSP_MS_STPwtRK:
+      PNominal: 0
+    PCM_ESS:
+      Ness: 30
+      PNominal: 30*50
+    SC_ESSm:
+      PNominal: 0
+    TPS_MS_STPnoRK:
+      PNominal: 0
+    CBD:
+      sc: 9
+      Price:
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.65
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+      - 0.85
+  

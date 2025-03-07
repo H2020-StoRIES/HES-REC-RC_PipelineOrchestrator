@@ -159,6 +159,57 @@ class PipelineDispatcher:
                         # pause= input("Press Enter to continue...")
                         r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
                 self.config_copy[outer_key][key] = r
+            if key.endswith('P_baseThermalProfile_val'):
+                print(key, outer_key, '******************')
+                factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
+                if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
+                    print('11111111111111')
+                    number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
+                    number1="{:03d}".format(int(number1))
+                    number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
+                    number2="{:03d}".format(int(number2))
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
+                    if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
+                        data_type= 'Anual'
+                        Day= self.config_copy ['CBD']['Day']
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900, factor= factor)
+                        
+                        self.config_copy[outer_key][key] = Data
+                    elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
+                        data_type= 'Diary'
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
+                        
+                        self.config_copy[outer_key][key] = Data
+                    else:
+                        print('Error')
+                else:
+                    print('222222222')
+                    Data1= []
+                    for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
+                        number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
+                        number1="{:03d}".format(int(number1))
+                        number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
+                        number2="{:03d}".format(int(number2))
+                        CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
+                        if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
+                            data_type= 'Anual'
+                            Day= self.config_copy ['CBD']['Day']
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900, factor= factor)
+                            
+                            self.config_copy[outer_key][key] = Data
+                        elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
+                            data_type= 'Diary'
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
+                            
+                            self.config_copy[outer_key][key] = Data
+                        else:
+                            print('Error')
+
+                        if Data1== []:
+                            Data1= Data
+                        else:
+                            Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
+                        self.config_copy[outer_key][key] = Data1
             if key.endswith('ElectricProfile_val'):
                 factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
                 #if there is just one component
@@ -238,7 +289,7 @@ class PipelineDispatcher:
                             print('Error')
             elif key.startswith('ThermalProfile_val'):
                 factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
-                if isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
+                if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
                     number1="{:03d}".format(int(number1))
                     number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
@@ -258,6 +309,8 @@ class PipelineDispatcher:
                     else:
                         print('Error')
                 else:
+                    print(key, outer_key, '******************')
+                    Data1= []
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
                         number1="{:03d}".format(int(number1))
@@ -265,7 +318,7 @@ class PipelineDispatcher:
                         number2="{:03d}".format(int(number2))
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
                         # pause= input("Press Enter to continue...")
-                        Data1= []
+                        
                         if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
@@ -284,13 +337,14 @@ class PipelineDispatcher:
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                             data_type= 'Diary'
-                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
+                            Day= 1
+                            Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 3600, factor= factor)
                             
                             self.config_copy[outer_key][key] = Data
                             if Data1== []:
                                 Data1= Data
                             else:
-                                Data1= [Data1[i][:] + [Data[i][1]] for i in range(len(Data))]
+                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
                             
                             self.config_copy[outer_key][key] = Data1
                         else:
@@ -300,7 +354,11 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Short profile'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number} (2)'
+                    if 'sc' in self.config_copy['CBD']:
+                        ctrl= self.config_copy['CBD']['sc']
+                    else:
+                        ctrl= ''
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}{ctrl}'
                     column= f'{outer_key}_tON'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -311,7 +369,11 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Diary'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number} (2)'
+                    if 'sc' in self.config_copy['CBD']:
+                        ctrl= self.config_copy['CBD']['sc']
+                    else:
+                        ctrl= ''
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}{ctrl}'
                     column= f'{outer_key}_{key.split('_')[1]}'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -539,6 +601,7 @@ class PipelineDispatcher:
                 data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
                 data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
                 data['Price']= scenario_data['CBD']['Price']
+                data['Price_gas'] = scenario_data['CBD']['Price_gas']
 
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
                 json.dump(data, f, indent=4)
