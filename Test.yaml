@@ -1,0 +1,15 @@
+base_config:
+  base_config_xls: test_bookChap_config
+  base_config_yaml: test_bookChap_config
+  force_reload: false
+study_mode:
+  param_range: false
+  run_dict: true
+study_param_range:
+  CBD:
+    Day:
+    - 51
+study_run_dicts:
+  run_04:
+    CBD:
+      sc: 4_V1

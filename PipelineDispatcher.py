@@ -161,18 +161,24 @@ class PipelineDispatcher:
                 self.config_copy[outer_key][key] = r
             if key.endswith('P_baseThermalProfile_val'):
                 print(key, outer_key, '******************')
+                print(self.config_copy[outer_key]['PNominal'])
                 factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
                 if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
-                    print('11111111111111')
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
                     number1="{:03d}".format(int(number1))
                     number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                     number2="{:03d}".format(int(number2))
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
+                    print(CSV_file)
                     if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900, factor= factor)
+                        if outer_key== 'CSP_MS_STPwtRK' or outer_key== 'TPS_MS_STPnoRK':
+                            interval = 3600
+                        else:
+                            interval = 900
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
+                        
                         
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
@@ -222,7 +228,7 @@ class PipelineDispatcher:
                     if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        if outer_key== 'CSP_MS_STPwtRK':
+                        if outer_key== 'CSP_MS_STPwtRK' or outer_key== 'TPS_MS_STPnoRK':
                             interval = 3600
                         else:
                             interval = 900
@@ -250,7 +256,7 @@ class PipelineDispatcher:
                         if self.config_copy [outer_key]['P_baseElectricProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            if outer_key== 'CSP_MS_STPwtRK':
+                            if outer_key== 'CSP_MS_STPwtRK' or outer_key== 'TPS_MS_STPnoRK':
                                 interval = 3600
                             else:
                                 interval = 900
@@ -298,7 +304,12 @@ class PipelineDispatcher:
                     if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
-                        Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= 900, factor= factor)
+                        if outer_key== 'CSP_MS_STPwtRK' or outer_key== 'TPS_MS_STPnoRK':
+                            interval = 3600
+                        else:
+                            interval = 900
+                        Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
+                        
                         
                         self.config_copy[outer_key][key] = Data
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
@@ -322,7 +333,7 @@ class PipelineDispatcher:
                         if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                             data_type= 'Anual'
                             Day= self.config_copy ['CBD']['Day']
-                            if outer_key== 'CSP_MS_STPwtRK':
+                            if outer_key== 'CSP_MS_STPwtRK' or outer_key== 'TPS_MS_STPnoRK':
                                 interval = 3600
                             else:
                                 interval = 900
@@ -620,5 +631,5 @@ class PipelineDispatcher:
 
 # Example usage
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
+    dispatcher = PipelineDispatcher(study_file_Nm="Test")
     dispatcher.run_pipeline()
