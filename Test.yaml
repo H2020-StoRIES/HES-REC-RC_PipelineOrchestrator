@@ -10,6 +10,7 @@ study_param_range:
     Day:
     - 51
 study_run_dicts:
-  run_04:
+  run_01:
     CBD:
-      sc: 4_V1
+      sc: TEST
+

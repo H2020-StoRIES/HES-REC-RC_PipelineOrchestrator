@@ -1,8 +1,8 @@
 import yaml
 
 # File paths
-file1 = r"C:\Users\szata\Codes\StoriesTeams\log_data\Study_1742905521\scenario_run_04_1.yaml"
-file2 = r"C:\Users\szata\Codes\StoriesTeams\t32-ref-case-dev\test_bookChap_data\test_bookChap_config.yaml"
+file1 = r"C:\Users\szata\Codes\StoriesTeams\log_data\Study_1742915299\scenario_run_04_1.yaml"
+file2 = r"C:\Users\szata\Codes\StoriesTeams\t32-ref-case-dev\TP_Soria_CtrlSyst_day_0514_V1.yaml"
 
 # Load YAML files
 def load_yaml(file_path):

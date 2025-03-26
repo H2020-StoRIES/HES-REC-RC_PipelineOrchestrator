@@ -144,7 +144,7 @@ class PipelineDispatcher:
                 number1="{:03d}".format(int(number1))
                 number2= self.config_copy[outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                 number2="{:03d}".format(int(number2))
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_RC_nu_{number1}_{number2}'
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_RC_nu_{number1}_{number2}_SZT'
                 Day= self.config_copy ['CBD']['Day']
                 T=24
                 H=3600
@@ -611,8 +611,8 @@ class PipelineDispatcher:
                 data['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
                 data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
                 data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
-                data['Price']= scenario_data['CBD']['Price']
-                data['Price_gas'] = scenario_data['CBD']['Price_gas']
+                # data['Price']= scenario_data['CBD']['epzProfile_val']
+                # data['Price_gas'] = scenario_data['CBD']['epzProfile_val']
 
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
                 json.dump(data, f, indent=4)
@@ -631,5 +631,6 @@ class PipelineDispatcher:
 
 # Example usage
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="Test")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
+    # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
