@@ -26,6 +26,8 @@ class PipelineDispatcher:
         self.path_simulation= '../t32-ref-case-dev'
         self.path_dispatcher= '../Pipeline-dispatcher'
         self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
+        self.log_data = '../log_data'
+        self.dispatch_optimisation= '../DispatchOptimisation'
     def xls_to_yaml(self):
         
         matlab_script = f"""
@@ -160,8 +162,6 @@ class PipelineDispatcher:
                         r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
                 self.config_copy[outer_key][key] = r
             if key.endswith('P_baseThermalProfile_val'):
-                print(key, outer_key, '******************')
-                print(self.config_copy[outer_key]['PNominal'])
                 factor= self.config_copy[outer_key]['PNominal'] /self.config_copy[outer_key]['PBase']
                 if not isinstance( self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'], list):
                     number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_']
@@ -169,7 +169,6 @@ class PipelineDispatcher:
                     number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                     number2="{:03d}".format(int(number2))
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
-                    print(CSV_file)
                     if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                         data_type= 'Anual'
                         Day= self.config_copy ['CBD']['Day']
@@ -189,7 +188,6 @@ class PipelineDispatcher:
                     else:
                         print('Error')
                 else:
-                    print('222222222')
                     Data1= []
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
@@ -320,7 +318,6 @@ class PipelineDispatcher:
                     else:
                         print('Error')
                 else:
-                    print(key, outer_key, '******************')
                     Data1= []
                     for i in range(len(self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'])):
                         number1= self.config_copy [outer_key]['ProfileCaseVal1_columnSelectionByCase_'][i]
@@ -530,7 +527,7 @@ class PipelineDispatcher:
         print(f'KPI calculation is running for file: {run_id}')
         # script_parent_dir = Path(__file__).parent.parent
         # path = script_parent_dir / 'log_data'/ OUTdir_study
-        path = f'../log_data/{OUTdir_study}'
+        path = f'{self.log_data}/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
         subprocess.Popen(['python', kpi_script_path, f'{run_id}_KPI',path, run_id])
@@ -561,15 +558,72 @@ class PipelineDispatcher:
             print(f"KPI summary written to JSON file: {self.Output_directory}/KPI_summary.json")
         else:
             print("No KPI summary data to write.")
-
+    def Translate_Dicts_Opt (self, Transdict_Path, Config_template_Path):
+                for idx in self.scenario_name:
+                    df= pd.read_excel (Transdict_Path)
+                    with open(Config_template_Path, 'r') as f:
+                        Opt_config= yaml.safe_load(f)
+                    with open (f'{self.Output_directory}/{idx}.yaml') as f:
+                        Sim_config= yaml.safe_load(f)
+                        for _, row in df.iterrows():
+                            Sim_Key1 = row['Sim_Key1']
+                            Sim_Key2 = row['Sim_Key2']
+                            Opt_Key1 = row ['Opt_Key1']
+                            Opt_Key2 = row ['Opt_Key2']
+                            Opt_Key3 = row ['Opt_Key3']
+                            if pd.isna(Opt_Key1):
+                                # Only two levels of nesting
+                                Opt_config[Opt_Key2][Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
+                            else:
+                                # Three levels of nesting
+                                # Opt_config [Opt_Key1][0][Opt_Key2][Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
+                                        if isinstance(Opt_config.get(Opt_Key1), list):
+                                            for item in Opt_config[Opt_Key1]:
+                                                if Opt_Key2 in item:
+                                                    item[Opt_Key2][Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
+                                                    break
+                                        else:
+                                            # Normal 3-stage nesting
+                                            Opt_config.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
+                    with open(f'{self.Output_directory}/config_{idx}.yaml', 'w') as f:
+                        yaml.dump(Opt_config, f) 
+    def Translate_Dicts_Sim (self, Transdict_Path, Opt_Output_Path):
+                for idx in self.scenario_name:
+                    df= pd.read_excel (Transdict_Path)
+                    with open(Opt_Output_Path, 'r') as f:
+                        Opt_output= yaml.safe_load(f)
+                    with open (f'{self.Output_directory}/{idx}.yaml') as f:
+                        Sim_config= yaml.safe_load(f)
+                        for _, row in df.iterrows():
+                            Sim_Key1 = row['Sim_Key1']
+                            Sim_Key2 = row['Sim_Key2']
+                            Opt_Key1 = row ['Opt_Key1']
+                            Opt_Key2 = row ['Opt_Key2']
+                            Opt_Key3 = row ['Opt_Key3']
+                            if pd.isna(Opt_Key1):
+                                # Only two levels of nesting
+                                Sim_config[Sim_Key1][Sim_Key2]= Opt_output[Opt_Key2][Opt_Key3]
+                            else:
+                                # Three levels of nesting
+                                # Opt_config [Opt_Key1][0][Opt_Key2][Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
+                                        if isinstance(Opt_output.get(Opt_Key1), list):
+                                            for item in Opt_output[Opt_Key1]:
+                                                if Opt_Key2 in item:
+                                                    Sim_config[Sim_Key1][Sim_Key2]= item[Opt_Key2][Opt_Key3]
+                                                    break
+                                        else:
+                                            # Normal 3-stage nesting
+                                            Sim_config[Sim_Key1][Sim_Key2]= Opt_output.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3] 
+                    with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
+                        yaml.dump(Sim_config, f) 
 # ********************************************************************************************************************
     def run_pipeline(self):
         
-        OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1737132576' #4KPI
-        log_data = '../log_data'
-        os.mkdir(f'../log_data/{OUTdir_study}') #4KPI
-        self.Output_directory = f'../log_data/{OUTdir_study}' 
+        # OUTdir_study = f'Study_{time():.00f}'
+        OUTdir_study = 'Study_1744999768' #4KPI
+        
+        # os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
+        self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         self.load_study()
         print('Study loaded')
@@ -578,6 +632,7 @@ class PipelineDispatcher:
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
         self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
+        # Step 1-1: Generate yaml files and scenarios
         if self.study_data['base_config']['base_config_yaml'] is None:
             self.xls_to_yaml() 
             # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
@@ -595,7 +650,31 @@ class PipelineDispatcher:
         for idx in self.scenario_name:
             OUTyamlNmTxt.append(f'{self.Output_directory}/{idx}.yaml')
             OUTfile.append(f'{self.Output_directory}/{idx}')
-        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
+        # Step 1-2: Translate yaml files keys for optimisation
+         # Add some lines to yaml files
+            with open(f'{self.Output_directory}/{idx}.yaml', 'r') as f:
+                    scenario_data= yaml.safe_load(f)
+                    scenario_data ['CBD'] ['Total_El_load'] = [sum(row[1:]) + sum(row2[1:]) + sum(row3[1:]) for row, row2, row3 in zip(scenario_data['Cbue_NSCp']['P_baseElectricProfile_val'], scenario_data['Cbu_NSCp']['P_baseElectricProfile_val'], scenario_data['CEV_SCp']['P_baseElectricProfile_val'])]
+                    scenario_data ['CBD'] ['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
+                    scenario_data ['CBD'] ['Total_El_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['WG_PPMp']['P_baseElectricProfile_val'], scenario_data['PV_PPMp']['P_baseElectricProfile_val'])]
+                    scenario_data ['CBD'] ['Total_Th_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['CSP_MS_STPwtRK']['P_baseThermalProfile_val'], scenario_data['TPS_MS_STPnoRK']['P_baseThermalProfile_val'])]
+                    scenario_data ['CBD'] ['Price'] = scenario_data ['elExGRID']['epzProfile_val']
+                    scenario_data ['CBD'] ['Price_gas'] = scenario_data ['elExGRID']['epzProfile_val']
+            with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
+                    yaml.dump(scenario_data, f)
+        # Translate Dicts
+        Transdict_Path= f'{self.dispatch_optimisation}/Transdict1.xlsx'
+        Config_template_Path= f'{self.dispatch_optimisation}/config/config_template.yaml'
+        self.Translate_Dicts_Opt (Transdict_Path, Config_template_Path)
+        
+        # Step 2: Run Optimisation
+
+        # Step 2-1: Update yaml files for simulink based on optimization outputs
+        Transdict_Path= f'{self.dispatch_optimisation}/Transdict2.xlsx'
+        Opt_Output_Path= f'{self.dispatch_optimisation}/config/config_template.yaml'
+        self.Translate_Dicts_Sim (Transdict_Path, Opt_Output_Path)
+        #Step 3: Run Simulink
+        # self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
         # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
         with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
             base_case_data = json.load(f)
@@ -607,17 +686,20 @@ class PipelineDispatcher:
                 data = json.load(f)
             with open(f'{self.Output_directory}/{idx}.yaml', 'r') as f:
                 scenario_data= yaml.safe_load(f)
-                data['Total_El_load'] = [sum(row[1:]) + sum(row2[1:]) + sum(row3[1:]) for row, row2, row3 in zip(scenario_data['Cbue_NSCp']['P_baseElectricProfile_val'], scenario_data['Cbu_NSCp']['P_baseElectricProfile_val'], scenario_data['CEV_SCp']['P_baseElectricProfile_val'])]
-                data['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
-                data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
-                data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
-                # data['Price']= scenario_data['CBD']['epzProfile_val']
-                # data['Price_gas'] = scenario_data['CBD']['epzProfile_val']
-
+                data ['Total_El_load'] = [sum(row[1:]) + sum(row2[1:]) + sum(row3[1:]) for row, row2, row3 in zip(scenario_data['Cbue_NSCp']['P_baseElectricProfile_val'], scenario_data['Cbu_NSCp']['P_baseElectricProfile_val'], scenario_data['CEV_SCp']['P_baseElectricProfile_val'])]
+                data ['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
+                # data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
+                # data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
+                data  ['Total_El_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['WG_PPMp']['P_baseElectricProfile_val'], scenario_data['PV_PPMp']['P_baseElectricProfile_val'])]
+                data ['Total_Th_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['CSP_MS_STPwtRK']['P_baseThermalProfile_val'], scenario_data['TPS_MS_STPnoRK']['P_baseThermalProfile_val'])]
+                data['Price']= scenario_data['elExGRID']['epzProfile_val']
+                data['Price_gas'] = scenario_data['elExGRID']['epzProfile_val']
+            
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
                 json.dump(data, f, indent=4)
+            
         # Step 4: Calculate KPIs for Base Case
-        path = f'../log_data/{OUTdir_study}'
+        path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
         subprocess.Popen(['python', kpi_script_path, f'Base_case_KPI',path])
         # Step 5: Calculate KPIs for Each Run
@@ -629,7 +711,6 @@ class PipelineDispatcher:
         # Step 6: Calculate Batch KPIs
         self.batch_kpi_calculation()
 
-# Example usage
 if __name__ == "__main__":
     dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
