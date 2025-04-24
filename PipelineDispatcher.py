@@ -487,9 +487,6 @@ class PipelineDispatcher:
         with open(json_file_path, 'w') as json_file:
             json.dump(data, json_file, indent=4)
             
-
-    def execute_optimization(self, run_id):
-        pass
     
     def execute_simulation(self, OUTyamlNmTxt, OUTfile):
         print(f"Executing simulation")
@@ -587,35 +584,49 @@ class PipelineDispatcher:
                                             Opt_config.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
                     with open(f'{self.Output_directory}/config_{idx}.yaml', 'w') as f:
                         yaml.dump(Opt_config, f) 
-    def Translate_Dicts_Sim (self, Transdict_Path):
-                for idx in self.scenario_name:
-                    df= pd.read_excel (Transdict_Path)
-                    with open(f'{self.Output_directory}/config_{idx}.yaml', 'r') as f:
-                        Opt_output= yaml.safe_load(f)
-                    with open (f'{self.Output_directory}/{idx}.yaml') as f:
-                        Sim_config= yaml.safe_load(f)
-                        for _, row in df.iterrows():
-                            Sim_Key1 = row['Sim_Key1']
-                            Sim_Key2 = row['Sim_Key2']
-                            Opt_Key1 = row ['Opt_Key1']
-                            Opt_Key2 = row ['Opt_Key2']
-                            Opt_Key3 = row ['Opt_Key3']
-                            if pd.isna(Opt_Key1):
-                                # Only two levels of nesting
-                                Sim_config[Sim_Key1][Sim_Key2]= Opt_output[Opt_Key2][Opt_Key3]
-                            else:
-                                # Three levels of nesting
-                                # Opt_config [Opt_Key1][0][Opt_Key2][Opt_Key3] = Sim_config[Sim_Key1][Sim_Key2]
-                                        if isinstance(Opt_output.get(Opt_Key1), list):
-                                            for item in Opt_output[Opt_Key1]:
-                                                if Opt_Key2 in item:
-                                                    Sim_config[Sim_Key1][Sim_Key2]= item[Opt_Key2][Opt_Key3]
-                                                    break
-                                        else:
-                                            # Normal 3-stage nesting
-                                            Sim_config[Sim_Key1][Sim_Key2]= Opt_output.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3] 
-                    with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
-                        yaml.dump(Sim_config, f) 
+    def Translate_Dicts_Sim(self, Transdict_Path):
+        interval = 3600  # seconds between time points
+
+        def add_timestamps(data_list, start_day=0):
+            if isinstance(data_list, list) and all(isinstance(x, (int, float)) for x in data_list):
+                return [[(start_day * len(data_list) + i) * interval, x] for i, x in enumerate(data_list)]
+            return data_list  # return as-is if it's not a numeric list
+
+        for idx in self.scenario_name:
+            df = pd.read_excel(Transdict_Path)
+
+            with open(f'{self.Output_directory}/config_{idx}.yaml', 'r') as f:
+                Opt_output = yaml.safe_load(f)
+
+            with open(f'{self.Output_directory}/{idx}.yaml') as f:
+                Sim_config = yaml.safe_load(f)
+
+            for _, row in df.iterrows():
+                Sim_Key1 = row['Sim_Key1']
+                Sim_Key2 = row['Sim_Key2']
+                Opt_Key1 = row['Opt_Key1']
+                Opt_Key2 = row['Opt_Key2']
+                Opt_Key3 = row['Opt_Key3']
+
+                if pd.isna(Opt_Key1):
+                    # Only two levels of nesting
+                    value = Opt_output[Opt_Key2][Opt_Key3]
+                    Sim_config[Sim_Key1][Sim_Key2] = add_timestamps(value)
+                else:
+                    if isinstance(Opt_output.get(Opt_Key1), list):
+                        for item in Opt_output[Opt_Key1]:
+                            if Opt_Key2 in item:
+                                value = item[Opt_Key2][Opt_Key3]
+                                Sim_config[Sim_Key1][Sim_Key2] = add_timestamps(value)
+                                break
+                    else:
+                        # Normal 3-stage nesting
+                        value = Opt_output.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3]
+                        Sim_config[Sim_Key1][Sim_Key2] = add_timestamps(value)
+
+            with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
+                yaml.dump(Sim_config, f)
+
     def Config_Opt_function(self,Config_Opt_path):
         for idx in self.scenario_name:
             df= pd.read_excel (Config_Opt_path)
@@ -645,10 +656,9 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         
-        # OUTdir_study = f'Study_{time():.00f}'
-        OUTdir_study = 'Study_1744999768' #4KPI
-        
-        # os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
+        OUTdir_study = f'Study_{time():.00f}'
+        # OUTdir_study = 'Study_1744999768' #4KPI
+        os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         self.load_study()
@@ -703,12 +713,16 @@ class PipelineDispatcher:
         for idx in self.scenario_name:
             config_file = f'{self.Output_directory}/config_{idx}.yaml'
             print(f"Launching optimization for: {config_file}")
-            subprocess.Popen(["python", Opt_path, config_file], stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            process= subprocess.Popen(["python", Opt_path, config_file]
+                             , stdout=subprocess.DEVNULL
+                            #  ,stderr=subprocess.DEVNULL
+                             )
+            process.wait() 
         # Step 2-1: Update yaml files for simulink based on optimization outputs
         Transdict_Path= f'{self.path_dispatch_optimisation}/Transdict2.xlsx'
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
-        # self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
+        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
         # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
         with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
             base_case_data = json.load(f)
