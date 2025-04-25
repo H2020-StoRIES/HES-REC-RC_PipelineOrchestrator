@@ -179,7 +179,7 @@ class PipelineDispatcher:
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
                         
                         
-                        self.config_copy[outer_key][key] = Data
+                        self.config_copy[outer_key][key] =  [[abs(x) for x in sublist] for sublist in Data] #TODO: We used abs because th data sometimes is negative and we need csp to be always generating
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                         data_type= 'Diary'
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
@@ -232,7 +232,7 @@ class PipelineDispatcher:
                             interval = 900
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
                         
-                        self.config_copy[outer_key][key] = Data
+                        self.config_copy[outer_key][key] =  [[abs(x) for x in sublist] for sublist in Data]
                     elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
                         data_type= 'Diary'
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
@@ -260,9 +260,9 @@ class PipelineDispatcher:
                                 interval = 900
                             Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval= interval, factor= factor)
                             if Data1== []:
-                                Data1= Data
+                                Data1=  [[abs(x) for x in sublist] for sublist in Data]
                             else:
-                                Data1= [Data1[i] + [Data[i][1]] for i in range(len(Data))]
+                                Data1= [Data1[i] + [abs(Data[i][1])] for i in range(len(Data))]
                             
                             self.config_copy[outer_key][key] = Data1
                         elif self.config_copy [outer_key]['P_baseElectricProfileType']== 'Diary':
@@ -309,7 +309,7 @@ class PipelineDispatcher:
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day= Day, interval= interval, factor= factor)
                         
                         
-                        self.config_copy[outer_key][key] = Data
+                        self.config_copy[outer_key][key] =  [[abs(x) for x in sublist] for sublist in Data]
                     elif self.config_copy [outer_key]['P_baseThermalProfileType']== 'Diary':
                         data_type= 'Diary'
                         Data= self.Read_data_from_csv (CSV_file, data_type, Day=1, interval= 3600, factor= factor)
@@ -336,7 +336,7 @@ class PipelineDispatcher:
                                 interval = 900
                             Data= self.Read_data_from_csv (CSV_file, data_type, Day=Day, interval=interval, factor= factor)
                             
-                            self.config_copy[outer_key][key] = Data
+                            self.config_copy[outer_key][key] =  [[abs(x) for x in sublist] for sublist in Data]
                             if Data1== []:
                                 Data1= Data
                             else:
@@ -657,7 +657,7 @@ class PipelineDispatcher:
     def run_pipeline(self):
         
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1744999768' #4KPI
+        # OUTdir_study = 'Study_1745568811' #4KPI
         os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
@@ -723,11 +723,7 @@ class PipelineDispatcher:
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
         self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
-        # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
-        with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
-            base_case_data = json.load(f)
-        with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
-            json.dump(base_case_data, f, indent=4)
+        
         # Add some columns to the _KPI.json files
         for idx in self.scenario_name:
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
@@ -745,7 +741,11 @@ class PipelineDispatcher:
             
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
                 json.dump(data, f, indent=4)
-            
+        # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
+        with open(f'{self.Output_directory}/{self.base_case_NM}_KPI.json', 'r') as f:
+            base_case_data = json.load(f)
+        with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
+            json.dump(base_case_data, f, indent=4)
         # Step 4: Calculate KPIs for Base Case
         path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')

@@ -22,58 +22,58 @@ study_run_dicts:
       PNominal: 1400
     SC_ESSm:
       PNominal: 0
-  run_02:
-    BAT_ESSm:
-      Ness: 83
-      PNominal: 6806
-    CBD:
-      sc: 2
-    PCM_ESS:
-      Ness: 28
-      PNominal: 1400
-    SC_ESSm:
-      PNominal: 0
-  run_03:
-    BAT_ESSm:
-      Ness: 88
-      PNominal: 7216
-    CBD:
-      sc: 3
-    PCM_ESS:
-      Ness: 20
-      PNominal: 1000
-    SC_ESSm:
-      PNominal: 0
-  run_04:
-    BAT_ESSm:
-      Ness: 88
-      PNominal: 7216
-    CBD:
-      sc: 4
-    PCM_ESS:
-      Ness: 20
-      PNominal: 1000
-    SC_ESSm:
-      PNominal: 0
-  run_05:
-    BAT_ESSm:
-      Ness: 78
-      PNominal: 6396
-    CBD:
-      sc: 5
-    PCM_ESS:
-      Ness: 36
-      PNominal: 1800
-    SC_ESSm:
-      PNominal: 0
-  run_06:
-    BAT_ESSm:
-      Ness: 78
-      PNominal: 6396
-    CBD:
-      sc: 6
-    PCM_ESS:
-      Ness: 36
-      PNominal: 1800
-    SC_ESSm:
-      PNominal: 0
+  # run_02:
+  #   BAT_ESSm:
+  #     Ness: 83
+  #     PNominal: 6806
+  #   CBD:
+  #     sc: 2
+  #   PCM_ESS:
+  #     Ness: 28
+  #     PNominal: 1400
+  #   SC_ESSm:
+  #     PNominal: 0
+  # run_03:
+  #   BAT_ESSm:
+  #     Ness: 88
+  #     PNominal: 7216
+  #   CBD:
+  #     sc: 3
+  #   PCM_ESS:
+  #     Ness: 20
+  #     PNominal: 1000
+  #   SC_ESSm:
+  #     PNominal: 0
+  # run_04:
+  #   BAT_ESSm:
+  #     Ness: 88
+  #     PNominal: 7216
+  #   CBD:
+  #     sc: 4
+  #   PCM_ESS:
+  #     Ness: 20
+  #     PNominal: 1000
+  #   SC_ESSm:
+  #     PNominal: 0
+  # run_05:
+  #   BAT_ESSm:
+  #     Ness: 78
+  #     PNominal: 6396
+  #   CBD:
+  #     sc: 5
+  #   PCM_ESS:
+  #     Ness: 36
+  #     PNominal: 1800
+  #   SC_ESSm:
+  #     PNominal: 0
+  # run_06:
+  #   BAT_ESSm:
+  #     Ness: 78
+  #     PNominal: 6396
+  #   CBD:
+  #     sc: 6
+  #   PCM_ESS:
+  #     Ness: 36
+  #     PNominal: 1800
+  #   SC_ESSm:
+  #     PNominal: 0
