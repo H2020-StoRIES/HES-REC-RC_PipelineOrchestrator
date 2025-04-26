@@ -12,22 +12,17 @@ import numpy as np
 # WG and Cbu last data . but this code is correct
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
+        self.path_config= '../Config'
         self.study_file_Nm = study_file_Nm
-        # self.config_file_Nm = config_file_Nm
-        self.study_file = f'{study_file_Nm}.yaml'
-        # self.config_file= f'{config_file_Nm}.yaml'
+        self.study_file = f'{self.path_config}/{study_file_Nm}.yaml'
         self.runs = []
-        # self.OUTdir = f'{self.config_file_Nm}_output'
         self.scenario_name = []
-        # script_parent_dir = Path(__file__).parent.parent
-        # self.path_simulation= script_parent_dir/'t32-ref-case-dev'
-        # self.path_dispatcher= script_parent_dir/'Pipeline-dispatcher'
-        # self.path_kpi_calculation= script_parent_dir/'KPI_Evaluation\\KPI_Evaluation_python'
         self.path_simulation= '../t32-ref-case-dev'
         self.path_dispatcher= '../Pipeline-dispatcher'
         self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
+        
     def xls_to_yaml(self):
         
         matlab_script = f"""
@@ -66,7 +61,7 @@ class PipelineDispatcher:
             raise e
     
     def load_study(self):
-        self.study_data = self.read_yaml(self.study_file_Nm, self.path_dispatcher)
+        self.study_data = self.read_yaml(self.study_file_Nm, self.path_config)
 
 
     def generate_combinations(self, param_ranges):
@@ -104,7 +99,6 @@ class PipelineDispatcher:
                         period= H/interval
                         # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
                         df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                        # pause= input("Press Enter to continue...")
                         r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
 
             else:
@@ -136,7 +130,6 @@ class PipelineDispatcher:
                         period= H/interval
                         # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
                         df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                        # pause= input("Press Enter to continue...")
                         r.append([i * H, factor* float(df.iloc[:, 1].sum() / period), factor* float(df.iloc[:, 2].sum() / period)])
                 self.config_copy[outer_key][key] = r
             if key == 'nuProfile_val':
@@ -158,7 +151,6 @@ class PipelineDispatcher:
                         factor= 1
                         # Resample the interval-second dataset to 3600-second intervals by mean values, filling missing values with 0
                         df = csv_reader.loc[(csv_reader.iloc[:,0] >= id * H) & (csv_reader.iloc[:,0]  < (id + 1) * H)].fillna(0)
-                        # pause= input("Press Enter to continue...")
                         r.append([i * H, factor* float(df.iloc[:, 1].sum() / period)])
                 self.config_copy[outer_key][key] = r
             if key.endswith('P_baseThermalProfile_val'):
@@ -325,7 +317,6 @@ class PipelineDispatcher:
                         number2= self.config_copy [outer_key]['ProfileCaseVal2_columnSelectionBySub_case_'][i]
                         number2="{:03d}".format(int(number2))
                         CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy[outer_key]['P_baseThermalProfile']}_{number1}_{number2}'
-                        # pause= input("Press Enter to continue...")
                         
                         if self.config_copy [outer_key]['P_baseThermalProfileType']== 'Anual':
                             data_type= 'Anual'
@@ -362,11 +353,8 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Short profile'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    if 'sc' in self.config_copy['CBD']:
-                        ctrl= self.config_copy['CBD']['sc']
-                    else:
-                        ctrl= ''
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}{ctrl}'
+                    
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
                     column= f'{outer_key}_tON'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -377,11 +365,7 @@ class PipelineDispatcher:
                     # outer_key= key
                     data_type= 'Diary'
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
-                    if 'sc' in self.config_copy['CBD']:
-                        ctrl= self.config_copy['CBD']['sc']
-                    else:
-                        ctrl= ''
-                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}{ctrl}'
+                    CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
                     column= f'{outer_key}_{key.split('_')[1]}'
                     path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
@@ -527,8 +511,8 @@ class PipelineDispatcher:
         path = f'{self.log_data}/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        subprocess.Popen(['python', kpi_script_path, f'{run_id}_KPI',path, run_id])
-           
+        process= subprocess.Popen(['python', kpi_script_path, f'{run_id}_KPI',path, run_id])
+        process.wait() 
     
     def run_keys(self):
         
@@ -701,11 +685,11 @@ class PipelineDispatcher:
         
         # Step 1-2: Translate yaml files keys for optimisation
         # Translate Dicts
-        Transdict_Path= f'{self.path_dispatch_optimisation}/Transdict1.xlsx'
+        Transdict_Path= f'{self.path_config}/Transdict1.xlsx'
         Config_template_Path= f'{self.path_dispatch_optimisation}/config/config_template.yaml'
         self.Translate_Dicts_Opt (Transdict_Path, Config_template_Path)
         # Step 1-2: Set config parameters for optimisation
-        Config_Opt_path= f'{self.path_dispatch_optimisation}/Config_Opt.xlsx'
+        Config_Opt_path= f'{self.path_config}/Config_Opt.xlsx'
         self.Config_Opt_function (Config_Opt_path)
         # Step 2: Run Optimisation
         Opt_path = os.path.join(f'{self.path_dispatch_optimisation}/StandaloneFunctions', 'DispatchOptimisationRunner.py')
@@ -719,7 +703,7 @@ class PipelineDispatcher:
                              )
             process.wait() 
         # Step 2-1: Update yaml files for simulink based on optimization outputs
-        Transdict_Path= f'{self.path_dispatch_optimisation}/Transdict2.xlsx'
+        Transdict_Path= f'{self.path_config}/Transdict2.xlsx'
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
         self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
@@ -749,13 +733,12 @@ class PipelineDispatcher:
         # Step 4: Calculate KPIs for Base Case
         path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        subprocess.Popen(['python', kpi_script_path, f'Base_case_KPI',path])
+        process= subprocess.Popen(['python', kpi_script_path, f'Base_case_KPI',path])
+        process.wait()
         # Step 5: Calculate KPIs for Each Run
         for idx in self.scenario_name:
             self.calculate_kpis(idx, OUTdir_study)
-            
-        pause= input("Press Enter to continue...")
-        
+                    
         # Step 6: Calculate Batch KPIs
         self.batch_kpi_calculation()
 
