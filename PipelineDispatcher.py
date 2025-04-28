@@ -22,9 +22,8 @@ class PipelineDispatcher:
         self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
-        
+        self.INdir= f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
     def xls_to_yaml(self):
-        
         matlab_script = f"""
             clear all; restoredefaultpath %%%%%%%%%%%%%%%
             clearvars -except INstruct; restoredefaultpath
@@ -32,6 +31,7 @@ class PipelineDispatcher:
             addpath(genpath('auxFunc'));
             t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}.yaml',1);
             """
+        
         
         P1 = subprocess.Popen(
             ['matlab', '-batch', matlab_script], 
@@ -84,7 +84,7 @@ class PipelineDispatcher:
     def Read_data_from_csv (self, file_path, data_type, Day, interval, factor):
         H= 3600
         T= 24
-        with open(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{file_path}.csv', mode='r', newline='') as file:
+        with open(f'{self.INdir}/{file_path}.csv', mode='r', newline='') as file:
             csv_reader = pd.read_csv(file, header=None)
             r = []
             if data_type =='Diary' or data_type== 'Short profile':
@@ -124,7 +124,7 @@ class PipelineDispatcher:
                 T=24
                 H=3600
                 r= []
-                csv_reader = pd.read_csv(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv', header=None)
+                csv_reader = pd.read_csv(f'{self.INdir}/{CSV_file}.csv', header=None)
                 for i in range(T):
                         id= i+(day-1)*T
                         period= H/interval
@@ -144,7 +144,7 @@ class PipelineDispatcher:
                 T=24
                 H=3600
                 r= []
-                csv_reader = pd.read_csv(f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv', header=None)
+                csv_reader = pd.read_csv(f'{self.INdir}/{CSV_file}.csv', header=None)
                 for i in range(T):
                         id= i+(Day-1)*T
                         period= H/interval
@@ -356,7 +356,7 @@ class PipelineDispatcher:
                     
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
                     column= f'{outer_key}_tON'
-                    path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
+                    path=f'{self.INdir}/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
                         csv_reader = pd.read_csv(file)
                         data_list = csv_reader[column].dropna().tolist() # eliminate NaN values
@@ -367,7 +367,7 @@ class PipelineDispatcher:
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
                     column= f'{outer_key}_{key.split('_')[1]}'
-                    path=f'{self.path_simulation}/test_bookChap_data/test_bookChap_config/{CSV_file}.csv'
+                    path=f'{self.INdir}//{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
                         csv_reader = pd.read_csv(file)
                         data_list = [[time1, data] for time1, data in zip(csv_reader['Time'], csv_reader[column])]
@@ -377,7 +377,7 @@ class PipelineDispatcher:
                 self.replace_strings_with_csv_columns(value, outer_key)
         
     def generate_scenarios(self):
-        config= self.read_yaml(self.config_file_Nm, self.path_simulation)
+        config= self.read_yaml(self.config_file_Nm, self.path_config)
         
         self.config_copy = config
         param_ranges = self.study_data['study_param_range']
@@ -651,7 +651,7 @@ class PipelineDispatcher:
         self.config_file= f'{self.config_file_Nm}.yaml'
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.config_file_Nm}.xlsx'
-        self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
+        # self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
         # Step 1-1: Generate yaml files and scenarios
         if self.study_data['base_config']['base_config_yaml'] is None:
             self.xls_to_yaml() 
@@ -743,6 +743,6 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
