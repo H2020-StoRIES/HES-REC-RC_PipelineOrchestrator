@@ -22,17 +22,16 @@ class PipelineDispatcher:
         self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
-        self.INdir= f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
+        # self.INdir= f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
+        self.INdir= self.path_config
     def xls_to_yaml(self):
         matlab_script = f"""
             clear all; restoredefaultpath %%%%%%%%%%%%%%%
             clearvars -except INstruct; restoredefaultpath
             cd('{self.path_simulation}');
             addpath(genpath('auxFunc'));
-            t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.INdir}', '{self.config_file_Nm}.yaml',1);
+            t32_RefCase_ReadCfg_4xlscsv2yalm('{self.INfile}', '{self.path_config}', '{self.path_config}/{self.config_file_Nm}.yaml',1);
             """
-        
-        
         P1 = subprocess.Popen(
             ['matlab', '-batch', matlab_script], 
             stdout=subprocess.PIPE, 
@@ -45,9 +44,11 @@ class PipelineDispatcher:
         if P1.returncode == 0:
             print(stdout)
             print(f"Config file converted to YAML by MATLAB.")
+            return True
         else:
             print(stderr)
             print("Error in xls_to_yaml conversion")
+            return False
 
     def read_yaml(self, filename, path):
         file_path = os.path.join(path, f'{filename}.yaml')
@@ -367,7 +368,7 @@ class PipelineDispatcher:
                     day_number = "{:03d}".format(int(self.config_copy['CBD']['Day']))
                     CSV_file= f'TP_{self.config_copy['CBD']['Location']}_CtrlSyst_day_{day_number}'
                     column= f'{outer_key}_{key.split('_')[1]}'
-                    path=f'{self.INdir}//{CSV_file}.csv'
+                    path=f'{self.INdir}/{CSV_file}.csv'
                     with open(path, mode='r', newline='') as file:
                         csv_reader = pd.read_csv(file)
                         data_list = [[time1, data] for time1, data in zip(csv_reader['Time'], csv_reader[column])]
@@ -650,15 +651,18 @@ class PipelineDispatcher:
         self.config_file_Nm = self.study_data['base_config']['base_config_xls']
         self.config_file= f'{self.config_file_Nm}.yaml'
         self.MDLfile = 'ElectricSys_CEDERsimple01'
-        self.INfile = f'{self.config_file_Nm}.xlsx'
+        self.INfile = f'{self.path_config}/{self.config_file_Nm}.xlsx'
         # self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
         # Step 1-1: Generate yaml files and scenarios
         if self.study_data['base_config']['base_config_yaml'] is None:
-            self.xls_to_yaml() 
-            # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
-            self.study_data['base_config']['base_config_yaml'] = self.config_file_Nm
-            with open(f'{self.study_file}', 'w') as f:
-                yaml.dump(self.study_data, f)
+            if self.xls_to_yaml():
+                # Write updated study data to YAML file (Showing that the base_config_yaml has been updated)
+                self.study_data['base_config']['base_config_yaml'] = self.config_file_Nm
+                with open(f'{self.study_file}', 'w') as f:
+                    yaml.dump(self.study_data, f)
+            else:
+                print(f"Error: Failed to convert {self.config_file_Nm}.xlsx to YAML")
+                exit(1)
         elif self.study_data['base_config']['base_config_yaml'] == self.config_file_Nm:
             pass
         else:
@@ -743,6 +747,6 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
