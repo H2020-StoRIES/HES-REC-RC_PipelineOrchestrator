@@ -409,7 +409,9 @@ class PipelineDispatcher:
                         self.scenario_name.append(f'scenario_{run_name}_{idx+1}')
                         yaml.dump(self.config_copy, f)
                         if run_name == 'run_01':
-                            self.base_case_NM= f'scenario_{run_name}_{idx+1}'
+                            if idx == 0:
+                                self.base_case_NM= f'scenario_{run_name}_{idx+1}'
+                                print(f'**************************, base case: {self.base_case_NM}')
                     print(f"Scenario {self.scenario_id} and {idx+1} generated for run {run_name}")
                     print(scenarios)
                     # Write scenario to JSON file
@@ -512,7 +514,7 @@ class PipelineDispatcher:
         path = f'{self.log_data}/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
-        process= subprocess.Popen(['python', kpi_script_path, f'{run_id}_KPI',path, run_id])
+        process= subprocess.Popen(['python', kpi_script_path, f'{run_id}',path, run_id])
         process.wait() 
     
     def run_keys(self):
@@ -613,6 +615,7 @@ class PipelineDispatcher:
                 yaml.dump(Sim_config, f)
 
     def Config_Opt_function(self,Config_Opt_path):
+        # 
         for idx in self.scenario_name:
             df= pd.read_excel (Config_Opt_path)
             with open(f'{self.Output_directory}/config_{idx}.yaml', 'r') as f:
@@ -640,9 +643,8 @@ class PipelineDispatcher:
                 yaml.dump(Opt_config, f) 
 # ********************************************************************************************************************
     def run_pipeline(self):
-        
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1745568811' #4KPI
+        # OUTdir_study = 'Study_1746541200' #4KPI
         os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
@@ -671,9 +673,12 @@ class PipelineDispatcher:
         self.generate_scenarios()
         OUTyamlNmTxt= []
         OUTfile= []
+    
         for idx in self.scenario_name:
             OUTyamlNmTxt.append(f'{self.Output_directory}/{idx}.yaml')
             OUTfile.append(f'{self.Output_directory}/{idx}')
+            print(f'OUTyamlNmTxt: {OUTyamlNmTxt}')
+            print(f'OUTfile: {OUTfile}')
         
          # Add some lines to yaml files
             with open(f'{self.Output_directory}/{idx}.yaml', 'r') as f:
@@ -686,7 +691,10 @@ class PipelineDispatcher:
                     # scenario_data ['CBD'] ['Price_gas'] = scenario_data ['elExGRID']['epzProfile_val']
             with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
                     yaml.dump(scenario_data, f)
-        
+        OUTfile1= list(dict.fromkeys(OUTfile))
+        OUTfile1 = '{' + ' '.join(f"'{item}'" for item in OUTfile1) + '}'
+        OUTyamlNmTxt1= list(dict.fromkeys(OUTyamlNmTxt))
+        OUTyamlNmTxt1 = '{' + ' '.join(f"'{item}'" for item in OUTyamlNmTxt1) + '}'
         # Step 1-2: Translate yaml files keys for optimisation
         # Translate Dicts
         Transdict_Path= f'{self.path_config}/Transdict1.xlsx'
@@ -710,8 +718,8 @@ class PipelineDispatcher:
         Transdict_Path= f'{self.path_config}/Transdict2.xlsx'
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
-        self.execute_simulation( set(OUTyamlNmTxt), set(OUTfile)) #4KPI
         
+        self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
         # Add some columns to the _KPI.json files
         for idx in self.scenario_name:
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
@@ -720,13 +728,11 @@ class PipelineDispatcher:
                 scenario_data= yaml.safe_load(f)
                 data ['Total_El_load'] = [sum(row[1:]) + sum(row2[1:]) + sum(row3[1:]) for row, row2, row3 in zip(scenario_data['Cbue_NSCp']['P_baseElectricProfile_val'], scenario_data['Cbu_NSCp']['P_baseElectricProfile_val'], scenario_data['CEV_SCp']['P_baseElectricProfile_val'])]
                 data ['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
-                # data['WG'] = [sum(row[1:]) for row in scenario_data['WG_PPMp']['P_baseElectricProfile_val']]
-                # data['PV'] = [sum(row[1:]) for row in scenario_data['PV_PPMp']['P_baseElectricProfile_val']]
-                data  ['Total_El_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['WG_PPMp']['P_baseElectricProfile_val'], scenario_data['PV_PPMp']['P_baseElectricProfile_val'])]
+                data ['Total_El_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['WG_PPMp']['P_baseElectricProfile_val'], scenario_data['PV_PPMp']['P_baseElectricProfile_val'])]
                 data ['Total_Th_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['CSP_MS_STPwtRK']['P_baseThermalProfile_val'], scenario_data['TPS_MS_STPnoRK']['P_baseThermalProfile_val'])]
-                # data['Price']= scenario_data['elExGRID']['epzProfile_val']
-                # data['Price_gas'] = scenario_data['elExGRID']['epzProfile_val']
-            
+                data['cost_obj'] = scenario_data['CBD']['cost_obj']
+                data['Cost_operation_ESS'] = scenario_data['CBD']['Cost_operation_ESS']
+               
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'w') as f:
                 json.dump(data, f, indent=4)
         # Copy Base Case data related to KPIs in a file named Base_case_KPI.json
@@ -747,6 +753,8 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_simple1")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
