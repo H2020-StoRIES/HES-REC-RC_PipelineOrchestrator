@@ -644,8 +644,8 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1746541200' #4KPI
-        os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
+        OUTdir_study = 'Study_1746704604' #4KPI
+        # os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         self.load_study()
@@ -677,8 +677,7 @@ class PipelineDispatcher:
         for idx in self.scenario_name:
             OUTyamlNmTxt.append(f'{self.Output_directory}/{idx}.yaml')
             OUTfile.append(f'{self.Output_directory}/{idx}')
-            print(f'OUTyamlNmTxt: {OUTyamlNmTxt}')
-            print(f'OUTfile: {OUTfile}')
+            
         
          # Add some lines to yaml files
             with open(f'{self.Output_directory}/{idx}.yaml', 'r') as f:
@@ -719,7 +718,7 @@ class PipelineDispatcher:
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
         
-        self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
+        # self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
         # Add some columns to the _KPI.json files
         for idx in self.scenario_name:
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
@@ -753,8 +752,8 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_file")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
