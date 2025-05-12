@@ -553,15 +553,23 @@ class PipelineDispatcher:
                         if isinstance(data_avg[key], (int, float)) and isinstance(data1.get(key), (int, float)):
                             data_avg[key] += data1[key]
             else:
+                if self.scenarios_number == 1:
+                    data_avg = data1.copy()
+                    data_avg['Run study name'] = f'Run_{ii}'
+                    data_avg_list.append(data_avg.copy())  # Append the whole dict, not just a value
+                    ii += 1
+                    data_avg = {}
+                    
+                else:
                 # Average all numeric values in data_avg
-                for key in data_avg:
-                    if isinstance(data_avg[key], (int, float)):
-                        data_avg[key] /= self.scenarios_number  # Use scenarios_number, not len(self.scenario_name)
-                data_avg['Run study name'] = f'Run_{ii}'
-                data_avg_list.append(data_avg.copy())  # Append the whole dict, not just a value
-                
-                ii += 1
-                data_avg = {}
+                    for key in data_avg:
+                        if isinstance(data_avg[key], (int, float)):
+                            data_avg[key] /= self.scenarios_number  # Use scenarios_number, not len(self.scenario_name)
+                    data_avg['Run study name'] = f'Run_{ii}'
+                    data_avg_list.append(data_avg.copy())  # Append the whole dict, not just a value
+                    
+                    ii += 1
+                    data_avg = {}
         with open(f'{self.Output_directory}/KPI_summary.json', 'w') as f:
             json.dump(KPI_summary, f, indent=4)
         if KPI_summary:
@@ -681,8 +689,8 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1747040660' #4KPI
-        os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
+        OUTdir_study = 'Study_1747044890' #4KPI
+        # os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
         self.load_study()
@@ -755,7 +763,7 @@ class PipelineDispatcher:
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
         
-        self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
+        # self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
         # Add some columns to the _KPI.json files
         for idx in self.scenario_name:
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
