@@ -383,6 +383,7 @@ class PipelineDispatcher:
         self.config_copy = config
         param_ranges = self.study_data['study_param_range']
         scenarios = self.generate_combinations(param_ranges)
+        self.scenarios_number = len(scenarios)
         self.scenario_id = 0
         if 'study_run_dicts' in self.study_data:
             study_run_dicts= self.study_data['study_run_dicts']
@@ -411,9 +412,9 @@ class PipelineDispatcher:
                         if run_name == 'run_01':
                             if idx == 0:
                                 self.base_case_NM= f'scenario_{run_name}_{idx+1}'
-                                print(f'**************************, base case: {self.base_case_NM}')
+                                # print(f'**************************, base case: {self.base_case_NM}')
                     print(f"Scenario {self.scenario_id} and {idx+1} generated for run {run_name}")
-                    print(scenarios)
+                    # print(scenarios)
                     # Write scenario to JSON file
                     scenario_json = {
                         "scenario_id": self.scenario_id,
@@ -524,24 +525,60 @@ class PipelineDispatcher:
                     self.runs.append(run_key)
     def batch_kpi_calculation(self):
         KPI_summary= []
+        jj= 0 # Scenario number
+        ii=1 # Run number
+        data_avg= {}
+        data_avg_list= []
+        print(self.scenarios_number)
+        data1 = None  # Ensure data1 is always defined
         for idx in self.scenario_name:
+            jj+= 1
             path= f'{self.Output_directory}/KPI_outputs_{idx}.json'
             try:
                 with open(path, 'r') as f:
                     data = json.load(f)
+                    data1 = data.copy()
                     data['scenario_name'] = idx
                     KPI_summary.append(data)
             except FileNotFoundError as e:
                 print(f"File not found: {path}")
                 raise e
+            if jj % self.scenarios_number != 0:
+                print(f'jj: {jj}, scenarios_number: {self.scenarios_number}')
+                if not data_avg and data1 is not None:
+                    data_avg = data1.copy()
+                elif data1 is not None:
+                    # Sum up numeric values for each key in the dictionaries
+                    for key in data_avg:
+                        if isinstance(data_avg[key], (int, float)) and isinstance(data1.get(key), (int, float)):
+                            data_avg[key] += data1[key]
+            else:
+                # Average all numeric values in data_avg
+                for key in data_avg:
+                    if isinstance(data_avg[key], (int, float)):
+                        data_avg[key] /= self.scenarios_number  # Use scenarios_number, not len(self.scenario_name)
+                data_avg['Run study name'] = f'Run_{ii}'
+                data_avg_list.append(data_avg.copy())  # Append the whole dict, not just a value
+                
+                ii += 1
+                data_avg = {}
         with open(f'{self.Output_directory}/KPI_summary.json', 'w') as f:
             json.dump(KPI_summary, f, indent=4)
         if KPI_summary:
             df = pd.DataFrame(KPI_summary)
-            df.to_csv(f'{self.Output_directory}/KPI_summary.csv', index=False)
+            df.to_excel(f'{self.Output_directory}/KPI_summary.xlsx', index=False)
             print(f"KPI summary written to JSON file: {self.Output_directory}/KPI_summary.json")
         else:
             print("No KPI summary data to write.")
+            # Write data_avg_list and its keys to another sheet in KPI_summary.xlsx
+        if data_avg_list:
+            # Prepare DataFrame for data_avg_list
+            avg_keys = list(data_avg_list[0].keys())  # Use keys from the first dict in the list
+            avg_df = pd.DataFrame(data_avg_list, columns=avg_keys)
+            # Write to a new sheet in the same Excel file
+            with pd.ExcelWriter(f'{self.Output_directory}/KPI_summary.xlsx', mode='a', engine='openpyxl') as writer:
+                avg_df.to_excel(writer, sheet_name='Averages', index=False)
+        
     def Translate_Dicts_Opt (self, Transdict_Path, Config_template_Path):
                 for idx in self.scenario_name:
                     df= pd.read_excel (Transdict_Path)
@@ -644,7 +681,7 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1746704604' #4KPI
+        # OUTdir_study = 'Study_1747040660' #4KPI
         os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
@@ -752,8 +789,8 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_file")
-    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
