@@ -120,12 +120,12 @@ class PipelineDispatcher:
                 Day= self.config_copy ['CBD']['Day']
                 factor= 1
                 interval = 3600
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022_SZT'
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
                 day=Day
                 T=24
                 H=3600
                 r= []
-                csv_reader = pd.read_csv(f'{self.INdir}/{CSV_file}.csv', header=None)
+                csv_reader = pd.read_csv(f'{self.INdir}/{CSV_file}.csv')
                 for i in range(T):
                         id= i+(day-1)*T
                         period= H/interval
@@ -140,7 +140,7 @@ class PipelineDispatcher:
                 number1="{:03d}".format(int(number1))
                 number2= self.config_copy[outer_key]['ProfileCaseVal2_columnSelectionBySub_case_']
                 number2="{:03d}".format(int(number2))
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_RC_nu_{number1}_{number2}_SZT'
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_RC_nu_{number1}_{number2}' #TODO: the nu csv files are wrong so I replaced them with constant values
                 Day= self.config_copy ['CBD']['Day']
                 T=24
                 H=3600
@@ -655,7 +655,9 @@ class PipelineDispatcher:
                         # Normal 3-stage nesting
                         value = Opt_output.setdefault(Opt_Key1, {}).setdefault(Opt_Key2, {})[Opt_Key3]
                         Sim_config[Sim_Key1][Sim_Key2] = add_timestamps(value)
-
+            #TODO: the nu csv files are wrong so I replaced them with constant values
+            RC_eff = Opt_output['Thermal_to_Electrical_Converters'][0][list(Opt_output['Thermal_to_Electrical_Converters'][0].keys())[0]]["Eta_RC"]
+            Sim_config['RC_SPMp']['nuProfile_val']=  [[row[0], RC_eff] for row in Sim_config['RC_SPMp']['nuProfile_val']]
             with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
                 yaml.dump(Sim_config, f)
 
