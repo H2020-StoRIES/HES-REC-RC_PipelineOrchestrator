@@ -529,7 +529,6 @@ class PipelineDispatcher:
         ii=1 # Run number
         data_avg= {}
         data_avg_list= []
-        print(self.scenarios_number)
         data1 = None  # Ensure data1 is always defined
         for idx in self.scenario_name:
             jj+= 1
@@ -799,8 +798,8 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_file")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
