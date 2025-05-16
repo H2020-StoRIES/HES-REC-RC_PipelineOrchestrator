@@ -543,7 +543,6 @@ class PipelineDispatcher:
                 print(f"File not found: {path}")
                 raise e
             if jj % self.scenarios_number != 0:
-                print(f'jj: {jj}, scenarios_number: {self.scenarios_number}')
                 if not data_avg and data1 is not None:
                     data_avg = data1.copy()
                 elif data1 is not None:
@@ -690,7 +689,7 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1747044890' #4KPI
+        # OUTdir_study = 'Study_1747206117' #4KPI
         os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
@@ -700,7 +699,6 @@ class PipelineDispatcher:
         self.config_file= f'{self.config_file_Nm}.yaml'
         self.MDLfile = 'ElectricSys_CEDERsimple01'
         self.INfile = f'{self.path_config}/{self.config_file_Nm}.xlsx'
-        # self.INdir = f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
         # Step 1-1: Generate yaml files and scenarios
         if self.study_data['base_config']['base_config_yaml'] is None:
             if self.xls_to_yaml():
@@ -717,6 +715,7 @@ class PipelineDispatcher:
             print(f"Error: base_config_yaml does not match base_config_xls")
             exit(1)
         self.generate_scenarios()
+        # ''' #4kpi
         OUTyamlNmTxt= []
         OUTfile= []
     
@@ -764,7 +763,7 @@ class PipelineDispatcher:
         self.Translate_Dicts_Sim (Transdict_Path)
         #Step 3: Run Simulink
         
-        self.execute_simulation( OUTyamlNmTxt1, OUTfile1) #4KPI
+        self.execute_simulation( OUTyamlNmTxt1, OUTfile1) 
         # Add some columns to the _KPI.json files
         for idx in self.scenario_name:
             with open(f'{self.Output_directory}/{idx}_KPI.json', 'r') as f:
@@ -785,6 +784,7 @@ class PipelineDispatcher:
             base_case_data = json.load(f)
         with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
             json.dump(base_case_data, f, indent=4)
+            # '''#4kpi
         # Step 4: Calculate KPIs for Base Case
         path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
