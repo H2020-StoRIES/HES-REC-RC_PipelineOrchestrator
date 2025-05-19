@@ -689,7 +689,7 @@ class PipelineDispatcher:
 # ********************************************************************************************************************
     def run_pipeline(self):
         OUTdir_study = f'Study_{time():.00f}'
-        # OUTdir_study = 'Study_1747206117' #4KPI
+        # OUTdir_study = 'Study_1747648166' #4KPI
         os.mkdir(f'{self.log_data}/{OUTdir_study}') #4KPI
         self.Output_directory = f'{self.log_data}/{OUTdir_study}' 
         # Step 1: Load Study Configuration
@@ -798,8 +798,8 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_file")
-    dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
+    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
+    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
     # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
