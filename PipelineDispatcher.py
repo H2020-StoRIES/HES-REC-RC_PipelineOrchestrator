@@ -784,7 +784,7 @@ class PipelineDispatcher:
             base_case_data = json.load(f)
         with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
             json.dump(base_case_data, f, indent=4)
-            '''#4kpi
+            # '''#4kpi
         # Step 4: Calculate KPIs for Base Case
         path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
