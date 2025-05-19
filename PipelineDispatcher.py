@@ -19,7 +19,7 @@ class PipelineDispatcher:
         self.scenario_name = []
         self.path_simulation= '../t32-ref-case-dev'
         self.path_dispatcher= '../Pipeline-dispatcher'
-        self.path_kpi_calculation= '../KPI_Evaluation/KPI_Evaluation_python'
+        self.path_kpi_calculation= '../KPI_Evaluation'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
         # self.INdir= f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
@@ -784,7 +784,7 @@ class PipelineDispatcher:
             base_case_data = json.load(f)
         with open(f'{self.Output_directory}/Base_case_KPI.json', 'w') as f:
             json.dump(base_case_data, f, indent=4)
-            # '''#4kpi
+            '''#4kpi
         # Step 4: Calculate KPIs for Base Case
         path = self.Output_directory
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
