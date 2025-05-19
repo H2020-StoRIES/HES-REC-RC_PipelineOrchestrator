@@ -1,3 +1,27 @@
+"""
+Information:
+--------------
+This script defines the PipelineDispatcher class, which automates the workflow for scenario generation, configuration translation, simulation execution, optimization, and KPI calculation for energy system studies. 
+It integrates with MATLAB and Python scripts, processes YAML/CSV/XLSX files, and manages batch processing of scenarios.
+
+Developer Info:
+-----------------
+Author: Seyede Zahra Tajalli
+Organization: Technical University of Denmark (DTU)
+Contact: szata@dtu.dk
+
+Requirements:
+- Python 3.x
+- pandas, numpy, pyyaml, openpyxl
+- MATLAB (for simulation steps)
+- Properly configured file paths and supporting scripts
+
+Usage:
+- Update the study_file_Nm parameter as needed.
+- Update studies in ../Config/study_XX.yaml
+- Run the script to generate scenarios, execute simulations, and calculate KPIs.
+- Output files will be saved in ../log_data.
+"""
 import yaml
 import subprocess
 import os
@@ -7,9 +31,6 @@ from itertools import product
 import json
 import pandas as pd
 import numpy as np
-#Different from config:
-# Cbue*100. Ask Marcos!
-# WG and Cbu last data . but this code is correct
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
         self.path_config= '../Config'
@@ -22,7 +43,6 @@ class PipelineDispatcher:
         self.path_kpi_calculation= '../KPI_Evaluation'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
-        # self.INdir= f'{self.path_simulation}/test_bookChap_data/test_bookChap_config'
         self.INdir= self.path_config
     def xls_to_yaml(self):
         matlab_script = f"""
@@ -394,8 +414,6 @@ class PipelineDispatcher:
             for run_name, run_values in study_run_dicts.items():
                 for idx, scenario in enumerate(scenarios):
                     self.scenario_id += 1
-                    # print(f"Generating scenario {scenario_id} for run {run_name}")
-                    # print(f"Scenario: {scenario}, Run: {run_name}, Values: {run_values}")
                     self.config_copy= config.copy()
                     for outer_key, inner_dict in run_values.items():
                         for inner_key, value in inner_dict.items():
@@ -405,17 +423,13 @@ class PipelineDispatcher:
                         self.config_copy[key_split[0]][key_split[1]] = value
                     
                     self.replace_strings_with_csv_columns(self.config_copy ,outer_key = '')
-                    # with open(f'{self.Output_directory}/scenario_{self.scenario_id}.yaml', 'w') as f:
                     with open(f'{self.Output_directory}/scenario_{run_name}_{idx+1}.yaml', 'w') as f:
                         self.scenario_name.append(f'scenario_{run_name}_{idx+1}')
                         yaml.dump(self.config_copy, f)
                         if run_name == 'run_01':
                             if idx == 0:
                                 self.base_case_NM= f'scenario_{run_name}_{idx+1}'
-                                # print(f'**************************, base case: {self.base_case_NM}')
                     print(f"Scenario {self.scenario_id} and {idx+1} generated for run {run_name}")
-                    # print(scenarios)
-                    # Write scenario to JSON file
                     scenario_json = {
                         "scenario_id": self.scenario_id,
                         "run_name": run_name,
@@ -510,8 +524,6 @@ class PipelineDispatcher:
     
     def calculate_kpis(self, run_id, OUTdir_study):
         print(f'KPI calculation is running for file: {run_id}')
-        # script_parent_dir = Path(__file__).parent.parent
-        # path = script_parent_dir / 'log_data'/ OUTdir_study
         path = f'{self.log_data}/{OUTdir_study}'
         print(f'path: {path}')
         kpi_script_path = os.path.join(self.path_kpi_calculation, 'KPI_evaluation.py')
@@ -801,5 +813,4 @@ if __name__ == "__main__":
     dispatcher = PipelineDispatcher(study_file_Nm="study_file")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
     # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
-    # dispatcher = PipelineDispatcher(study_file_Nm="TEST")
     dispatcher.run_pipeline()
