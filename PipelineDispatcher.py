@@ -34,6 +34,7 @@ import numpy as np
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
         self.path_config= '../Config'
+        self.path_time_series= '../Config/TimeSeries'
         self.study_file_Nm = study_file_Nm
         self.study_file = f'{self.path_config}/{study_file_Nm}.yaml'
         self.runs = []
@@ -43,7 +44,7 @@ class PipelineDispatcher:
         self.path_kpi_calculation= '../KPI_Evaluation'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'
-        self.INdir= self.path_config
+        self.INdir= self.path_time_series
     def xls_to_yaml(self):
         matlab_script = f"""
             clear all; restoredefaultpath %%%%%%%%%%%%%%%
@@ -140,7 +141,7 @@ class PipelineDispatcher:
                 Day= self.config_copy ['CBD']['Day']
                 factor= 1
                 interval = 3600
-                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_elePrizes_2022'
+                CSV_file= f'TP_{self.config_copy['CBD']['Location']}_{self.config_copy['elExGRID']['epz']}'
                 day=Day
                 T=24
                 H=3600
@@ -501,7 +502,7 @@ class PipelineDispatcher:
             addpath(genpath('{self.Output_directory}'))
             %%
             UTfile  = '';
-            plotON  = 1;
+            plotON  = 0;
             cfgON   = 1; 
             MDLfile  = 'ElectricSys_CEDERsimple01';
             [out] = t32_RefCase_RunSlx_4yalm2out({OUTyamlNmTxt},{OUTfile},MDLfile,cfgON,plotON,'',1);
@@ -743,8 +744,6 @@ class PipelineDispatcher:
                     scenario_data ['CBD'] ['Total_Th_load'] = [sum(row[1:]) for row in scenario_data['Ctbu_TCp']['P_baseThermalProfile_val']]
                     scenario_data ['CBD'] ['Total_El_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['WG_PPMp']['P_baseElectricProfile_val'], scenario_data['PV_PPMp']['P_baseElectricProfile_val'])]
                     scenario_data ['CBD'] ['Total_Th_Gen'] = [sum(row[1:]) + sum(row2[1:]) for row, row2 in zip(scenario_data['CSP_MS_STPwtRK']['P_baseThermalProfile_val'], scenario_data['TPS_MS_STPnoRK']['P_baseThermalProfile_val'])]
-                    # scenario_data ['CBD'] ['Price'] = scenario_data ['elExGRID']['epzProfile_val']
-                    # scenario_data ['CBD'] ['Price_gas'] = scenario_data ['elExGRID']['epzProfile_val']
             with open(f'{self.Output_directory}/{idx}.yaml', 'w') as f:
                     yaml.dump(scenario_data, f)
         OUTfile1= list(dict.fromkeys(OUTfile))
@@ -810,7 +809,6 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    dispatcher = PipelineDispatcher(study_file_Nm="study_file")
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_complete")
-    # dispatcher = PipelineDispatcher(study_file_Nm="study_file1")
+    # dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Portici")
+    dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Soria")
     dispatcher.run_pipeline()
