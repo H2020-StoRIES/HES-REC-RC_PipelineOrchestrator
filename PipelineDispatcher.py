@@ -809,6 +809,6 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    # dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Portici")
-    dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Soria")
+    # dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Portici") # comment this line to run the Soria study
+    dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Soria") # comment this line to run the Portici study
     dispatcher.run_pipeline()

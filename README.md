@@ -30,6 +30,8 @@ To run the pipeline, ensure the following:
 ---
 
 ## 🚀 How to Run the Pipeline
+0. **Define the study**  
+   The study setup is located in the`Config` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `Config` directory. Alternatively, you can run the default studies by following the instructions below.
 
 1. **Choose the study**  
    In `PipelineDispatcher.py`, uncomment the line for the study you want to run and comment the other one:
