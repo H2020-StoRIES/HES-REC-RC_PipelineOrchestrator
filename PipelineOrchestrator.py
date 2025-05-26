@@ -18,9 +18,9 @@ Requirements:
 
 Usage:
 - Update the study_file_Nm parameter as needed.
-- Update studies in ../Config/study_XX.yaml
+- Update studies in ../HES-REC-RC_Config/study_XX.yaml
 - Run the script to generate scenarios, execute simulations, and calculate KPIs.
-- Output files will be saved in ../log_data.
+- Output files will be saved in ../HES-REC-RC_log_data.
 """
 import yaml
 import subprocess
@@ -33,17 +33,17 @@ import pandas as pd
 import numpy as np
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
-        self.path_config= '../Config'
-        self.path_time_series= '../Config/TimeSeries'
+        self.path_config= '../HES-REC-RC_Config'
+        self.path_time_series= '../HES-REC-RC_Config/TimeSeries'
         self.study_file_Nm = study_file_Nm
         self.study_file = f'{self.path_config}/{study_file_Nm}.yaml'
         self.runs = []
         self.scenario_name = []
-        self.path_simulation= '../t32-ref-case-dev'
-        self.path_dispatcher= '../Pipeline-dispatcher'
-        self.path_kpi_calculation= '../KPI_Evaluation'
-        self.log_data = '../log_data'
-        self.path_dispatch_optimisation= '../DispatchOptimisation'
+        self.path_simulation= '../HES-REC-RC_IntegrationModel'
+        self.path_dispatcher= '../HES-REC-RC_PipelineOrchestrator'
+        self.path_kpi_calculation= '../HES-REC-RC_KPI_Evaluation'
+        self.log_data = '../HES-REC-RC_log_data'
+        self.path_dispatch_optimisation= '../HES-REC-RC_DispatchOptimisation'
         self.INdir= self.path_time_series
     def xls_to_yaml(self):
         matlab_script = f"""

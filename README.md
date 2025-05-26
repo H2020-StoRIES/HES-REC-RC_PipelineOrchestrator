@@ -35,7 +35,7 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 
 ## 🚀 How to Run the Pipeline
 0. **Define the study**  
-   The study setup is located in the`Config` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `Config` directory. Alternatively, you can run the default studies by following the instructions below.
+   The study setup is located in the`HES-REC-RC_Config` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `HES-REC-RC_Config` directory. Alternatively, you can run the default studies by following the instructions below.
 
 1. **Choose the study**  
    In `PipelineOrchestrator.py`, uncomment the line for the study you want to run and comment the other one:
@@ -52,7 +52,7 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 ---
 
 ## ⚙️ Configuration Files
-- Located in `Config`
+- Located in `HES-REC-RC_Config`
 
 - `Study_difinition_X.yaml` – Define study parameters, days to simulate, and scenario settings.
 - `config_simulation.xlsx` – Simulink settings (number of loads, ESS units, etc.)
@@ -62,7 +62,7 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 
 ## 📁 Output Structure
 
-Results are saved in `log_data/Study_TIMESTAMP` folders. Each contains:
+Results are saved in `HES-REC-RC_log_data/Study_TIMESTAMP` folders. Each contains:
 
 - `Execution_definition.json` – Overview of study and run configs
 - `scenario_run_XX_YY.yaml` – Inputs for Simulink
@@ -100,4 +100,4 @@ Results are saved in `log_data/Study_TIMESTAMP` folders. Each contains:
 
 ---
 
-For more examples and log files, see the `examples/` or `log_data/` folders if included.
+For more examples and log files, see the `HES-REC-RC_log_data/` repository
