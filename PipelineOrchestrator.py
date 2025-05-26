@@ -39,8 +39,8 @@ class PipelineDispatcher:
         self.study_file = f'{self.path_config}/{study_file_Nm}.yaml'
         self.runs = []
         self.scenario_name = []
-        self.path_simulation= '../IntegrationModel'
-        self.path_dispatcher= '../PipelineOrchestrator'
+        self.path_simulation= '../t32-ref-case-dev'
+        self.path_dispatcher= '../Pipeline-dispatcher'
         self.path_kpi_calculation= '../KPI_Evaluation'
         self.log_data = '../log_data'
         self.path_dispatch_optimisation= '../DispatchOptimisation'

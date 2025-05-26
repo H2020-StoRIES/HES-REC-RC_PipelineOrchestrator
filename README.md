@@ -7,25 +7,29 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 
 ## 📦 Repository Contents
 
-- `PipelineDispatcher.py` – Main script to execute the pipeline
-- `Study_difinition_Portici.yaml` / `Study_difinition_Soria.yaml` – Study configuration files
-- `config_simulation.xlsx` – Simulink model configuration
-- `Config_Opt.xlsx` – Optimization parameter configuration
-- `log_data/` – Output folder containing results and KPIs
+- `PipelineOrchestrator.py` – Main script to execute the pipeline
 
 ---
 
 ## 🔧 Prerequisites
 
-To run the pipeline, ensure the following:
-
 - **Python 3.12.0**
 - **MATLAB R2024b**
-  - Add-on: **Simscape Electrical**
-- Install Python dependencies:
+  - Required Add-on: Simscape Electrical
+- **CBC Solver** (for Mixed-Integer Linear Programming with Pyomo)  
+  - Download from: [https://github.com/coin-or/Cbc/releases](https://github.com/coin-or/Cbc/releases)  
+  - Recommended file: `Cbc-releases.2.10.12-w64-msvc17-md.zip` (for modern Windows systems)  
+  - Extract it (e.g., to `C:\cbc`)  
+  - Add the `C:\cbc\bin` directory to your system `Path` environment variable  
+  - Open a new terminal and verify installation with:
+    ```bash
+    cbc --version
+    ```
+
+- **Python packages**  
+  Install required packages using:
   ```bash
   pip install -r requirements.txt
-  ```
 
 ---
 
@@ -34,15 +38,15 @@ To run the pipeline, ensure the following:
    The study setup is located in the`Config` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `Config` directory. Alternatively, you can run the default studies by following the instructions below.
 
 1. **Choose the study**  
-   In `PipelineDispatcher.py`, uncomment the line for the study you want to run and comment the other one:
+   In `PipelineOrchestrator.py`, uncomment the line for the study you want to run and comment the other one:
    ```python
-   # dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Portici")
-   dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Soria")
+   # dispatcher = PipelineOrchestrator(study_file_Nm="Study_difinition_Portici")
+   dispatcher = PipelineOrchestrator(study_file_Nm="Study_difinition_Soria")
    ```
 
 2. **Run the pipeline**
    ```bash
-   python PipelineDispatcher.py
+   python PipelineOrchestrator.py
    ```
 
 ---
