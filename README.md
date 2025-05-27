@@ -35,13 +35,13 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 
 ## 🚀 How to Run the Pipeline
 0. **Define the study**  
-   The study setup is located in the`HES-REC-RC_Config` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `HES-REC-RC_Config` directory. Alternatively, you can run the default studies by following the instructions below.
+   The study setup is located in the`HES-REC-RC_ConfigInput` directory. For detailed instructions on how to define a custom study, please refer to the local `README` file within the `HES-REC-RC_ConfigInput` directory. Alternatively, you can run the default studies by following the instructions below.
 
 1. **Choose the study**  
    In `PipelineOrchestrator.py`, uncomment the line for the study you want to run and comment the other one:
    ```python
-   # dispatcher = PipelineOrchestrator(study_file_Nm="Study_difinition_Portici")
-   dispatcher = PipelineOrchestrator(study_file_Nm="Study_difinition_Soria")
+   # dispatcher = PipelineOrchestrator(study_file_Nm="Study_definition_Portici")
+   dispatcher = PipelineOrchestrator(study_file_Nm="Study_definition_Soria")
    ```
 
 2. **Run the pipeline**
@@ -52,9 +52,9 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 ---
 
 ## ⚙️ Configuration Files
-- Located in `HES-REC-RC_Config`
+- Located in `HES-REC-RC_ConfigInput`
 
-- `Study_difinition_X.yaml` – Define study parameters, days to simulate, and scenario settings.
+- `Study_definition_X.yaml` – Define study parameters, days to simulate, and scenario settings.
 - `config_simulation.xlsx` – Simulink settings (number of loads, ESS units, etc.)
 - `Config_Opt.xlsx` – Optimization inputs (objective weights, efficiencies, etc.)
 

@@ -18,7 +18,7 @@ Requirements:
 
 Usage:
 - Update the study_file_Nm parameter as needed.
-- Update studies in ../HES-REC-RC_Config/study_XX.yaml
+- Update studies in ../HES-REC-RC_ConfigInput/study_XX.yaml
 - Run the script to generate scenarios, execute simulations, and calculate KPIs.
 - Output files will be saved in ../HES-REC-RC_log_data.
 """
@@ -33,8 +33,8 @@ import pandas as pd
 import numpy as np
 class PipelineDispatcher:
     def __init__(self, study_file_Nm):
-        self.path_config= '../HES-REC-RC_Config'
-        self.path_time_series= '../HES-REC-RC_Config/TimeSeries'
+        self.path_config= '../HES-REC-RC_ConfigInput'
+        self.path_time_series= '../HES-REC-RC_ConfigInput/TimeSeries'
         self.study_file_Nm = study_file_Nm
         self.study_file = f'{self.path_config}/{study_file_Nm}.yaml'
         self.runs = []
@@ -809,7 +809,7 @@ class PipelineDispatcher:
         self.batch_kpi_calculation()
 
 if __name__ == "__main__":
-    # dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Portici") # comment this line to run the Soria study
-    dispatcher = PipelineDispatcher(study_file_Nm="Study_difinition_Soria") # comment this line to run the Portici study
+    # dispatcher = PipelineDispatcher(study_file_Nm="Study_definition_Portici") # comment this line to run the Soria study
+    dispatcher = PipelineDispatcher(study_file_Nm="Study_definition_Soria") # comment this line to run the Portici study
 
     dispatcher.run_pipeline()
