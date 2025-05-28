@@ -1,7 +1,7 @@
 
 # Pipeline Dispatcher
 
-This script runs the simulation-optimization pipeline for hybrid energy systems within Renewable Energy Communities (RECs). The pipeline automates scenario creation, Simulink-based simulation, optimization via Python, and KPI evaluation.
+This script runs the simulation-optimization pipeline for hybrid energy systems within Renewable Energy Communities (RECs). The pipeline automates scenario creation, Simulink-based simulation, optimization and KPI evaluation via Python.
 
 ---
 
@@ -12,7 +12,7 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
 ---
 
 ## 🔧 Prerequisites
-
+For more information of structure of cloning the repositories please refer to `HES-REC-RC__Info repository`.
 - **Python 3.12.0**
 - **MATLAB R2024b**
   - Required Add-on: Simscape Electrical
@@ -27,7 +27,7 @@ This script runs the simulation-optimization pipeline for hybrid energy systems 
     ```
 
 - **Python packages**  
-  Install required packages using:
+  Install required packages using the following code for installing the requirements.txt located in`HES-REC-RC__Info repository`:
   ```bash
   pip install -r requirements.txt
 
